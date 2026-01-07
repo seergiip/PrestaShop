@@ -1,0 +1,16 @@
+com/rgbconsulting/prestashop/common/rest/RestServiceLogging.class
+com/rgbconsulting/prestashop/common/odoo/types/Values.class
+com/rgbconsulting/prestashop/rest/RestClientOdoo.class
+com/rgbconsulting/prestashop/PrestaShop.class
+com/rgbconsulting/prestashop/controller/ControllerPrestShop.class
+com/rgbconsulting/prestashop/common/odoo/types/Recordset.class
+com/rgbconsulting/prestashop/common/odoo/connection/OdooConnection.class
+com/rgbconsulting/prestashop/common/odoo/model/Product.class
+com/rgbconsulting/prestashop/common/utils/DataTypeParser.class
+com/rgbconsulting/prestashop/common/odoo/types/Record.class
+com/rgbconsulting/prestashop/common/rest/RestServiceLog.class
+com/rgbconsulting/prestashop/common/odoo/types/Domain.class
+com/rgbconsulting/prestashop/common/database/PgJpaManagerFactory.class
+com/rgbconsulting/prestashop/rest/RestClientPrestaShop.class
+com/rgbconsulting/prestashop/common/rest/SecurityKeyAuthorizer.class
+com/rgbconsulting/prestashop/common/rest/SecurityKeyAuth.class

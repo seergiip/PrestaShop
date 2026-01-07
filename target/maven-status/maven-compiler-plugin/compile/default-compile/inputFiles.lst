@@ -1,0 +1,16 @@
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/PrestaShop.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/database/PgJpaManagerFactory.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/connection/OdooConnection.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/model/Product.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/types/Domain.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/types/Record.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/types/Recordset.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/odoo/types/Values.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/rest/RestServiceLog.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/rest/RestServiceLogging.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/rest/SecurityKeyAuth.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/rest/SecurityKeyAuthorizer.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/utils/DataTypeParser.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/controller/ControllerPrestShop.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/rest/RestClientOdoo.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/rest/RestClientPrestaShop.java
