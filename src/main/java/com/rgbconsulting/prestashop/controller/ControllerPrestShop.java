@@ -22,8 +22,8 @@ public class ControllerPrestShop {
         clientPrestaShop.uploadProduct(clientPrestaShop.initClient(), xmlProduct);
     }
     
-    public void updateProduct() {
-        clientPrestaShop.updateProduct(clientPrestaShop.initClient());
+    public void updateProduct(String xmlProduct) {
+        clientPrestaShop.updateProduct(clientPrestaShop.initClient(), xmlProduct);
     }
     
     public void deleteProductById(String id) {

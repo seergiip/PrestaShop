@@ -1,6 +1,6 @@
-package com.rgbconsulting.prestashop.common.odoo.types;
+package com.rgb.training.app.common.odoo.types;
 
-import com.rgbconsulting.prestashop.common.odoo.types.Record;
+import com.rgb.training.app.common.odoo.types.Record;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package com.rgbconsulting.prestashop.common.odoo.types;
+package com.rgb.training.app.common.odoo.types;
 
 import java.util.ArrayList;
 import java.util.List;

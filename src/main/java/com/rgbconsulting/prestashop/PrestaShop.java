@@ -1,6 +1,8 @@
 package com.rgbconsulting.prestashop;
 
+import com.rgbconsulting.prestashop.controller.ControllerOdoo;
 import com.rgbconsulting.prestashop.controller.ControllerPrestShop;
+import com.rgbconsulting.prestashop.mapper.ProductMapper;
 
 
 /**
@@ -19,12 +21,19 @@ public class PrestaShop {
         //cps.getAllProducts();
         
         // Upload a product to the prestashop
-        //String xmlProduct = "";
-        //cps.uploadProduct(xmlProduct);
+        ProductMapper mapperPOST = new ProductMapper("1", "1", "4", "PANTACAS", 300, 22, "4", "standard");
+        cps.uploadProduct(mapperPOST.xmlProductPOST());
         
         // Update a product from the prestashop
-        cps.updateProduct();
+        //ProductMapper mapperPUT = new ProductMapper("1", "1", "1", "TEST", 300, 22);
+        //cps.updateProduct(mapperPUT.xmlProductPUT());
         // Delete a product from the prestashop
-        cps.deleteProductById("1");
+        //cps.deleteProductById("1");
+        
+        
+        // Agafar producte de odoo
+        //ControllerOdoo controllerOdoo = new ControllerOdoo();
+        
+        //controllerOdoo.getProduct();
     }
 }

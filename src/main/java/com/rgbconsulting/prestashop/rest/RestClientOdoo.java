@@ -1,13 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.rgbconsulting.prestashop.rest;
 
+import com.rgbconsulting.prestashop.common.odoo.model.connection.OdooConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /**
@@ -16,13 +15,18 @@ import java.time.Duration;
  */
 public class RestClientOdoo {
 
-    private static final String URL = "http://localhost:8080/training-app/api/jta/client/";
-    private HttpClient client = initClient(this.client);
+    private static final String URL = "http://localhost:8069/api/jta/client/";
+    private HttpClient client = initClient();
+    private static String url = "";
+    private static String db = "";
+    private static String uid = "";
+    private static String pwd = "";
+    OdooConnection oc;
 
     /*
         Iniciar el client
      */
-    private HttpClient initClient(HttpClient client) {
+    private HttpClient initClient() {
         return client = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -34,8 +38,9 @@ public class RestClientOdoo {
     /*
         Get the product from odoo
      */
-    private void get(HttpClient client) {
-        HttpRequest request;
+    public void get() {
+        HttpRequest request = null;
+        HttpResponse response;
         try {
             request = HttpRequest.newBuilder()
                     .uri(new URI(URL))
@@ -44,6 +49,27 @@ public class RestClientOdoo {
                     .build();
         } catch (URISyntaxException u) {
             u.printStackTrace();
+        }
+        
+        if (request != null) {
+            try {
+                response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println("GET Status Code: " + response.statusCode());
+                System.out.println("GET Response Body: " + response.body());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
+        }
+    }
+    
+    private void startConnection () {
+        try {
+            oc = new OdooConnection(url, db, uid, pwd);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
     }
 }

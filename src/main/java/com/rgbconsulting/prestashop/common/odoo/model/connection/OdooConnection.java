@@ -1,7 +1,7 @@
-package com.rgbconsulting.prestashop.common.odoo.connection;
+package com.rgbconsulting.prestashop.common.odoo.model.connection;
 
-import com.rgbconsulting.prestashop.common.odoo.types.Recordset;
-import com.rgbconsulting.prestashop.common.odoo.types.Values;
+import com.rgb.training.app.common.odoo.types.Recordset;
+import com.rgb.training.app.common.odoo.types.Values;
 import java.net.MalformedURLException;
 import java.net.URL;
 import org.apache.xmlrpc.XmlRpcException;
@@ -129,7 +129,7 @@ public class OdooConnection {
         Values rows = Values.from(execute_kw(model, "unlink", args));
         Recordset results = new Recordset();
         for (int i = 0; i < ids.size(); i++) {
-            results.add(com.rgbconsulting.prestashop.common.odoo.types.Record.fromKeyValue(ids.get(i), rows.get(i)));
+            results.add(com.rgb.training.app.common.odoo.types.Record.fromKeyValue(ids.get(i), rows.get(i)));
         }
         return results;
     }

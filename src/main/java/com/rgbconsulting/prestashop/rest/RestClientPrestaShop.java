@@ -137,8 +137,31 @@ public class RestClientPrestaShop {
         If the product doesnt't exists, it shouts an error.
         If the product exists, it updates it.
      */
-    public void updateProduct(HttpClient client) {
-        
+    public void updateProduct(HttpClient client, String xmlProduct) {
+        HttpRequest request = null;
+        HttpResponse response;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI(URL + "/products/"))
+                    .header("Authorization", "Basic " + encodedAuth)
+                    .PUT(BodyPublishers.ofString(xmlProduct))
+                    .build();
+        } catch (URISyntaxException u) {
+            u.printStackTrace();
+        }
+
+        if (request != null) {
+            try {
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println("PUT Status Code: " + response.statusCode());
+                System.out.println("PUT Response Body: " + response.body());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
+        }
     }
     
     // DELETE
