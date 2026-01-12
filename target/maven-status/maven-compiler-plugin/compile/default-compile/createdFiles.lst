@@ -1,5 +1,6 @@
 com/rgbconsulting/prestashop/common/rest/RestServiceLogging.class
 com/rgbconsulting/prestashop/rest/RestClientOdoo.class
+com/rgbconsulting/prestashop/model/PrestaShopParser.class
 com/rgbconsulting/prestashop/PrestaShop.class
 com/rgbconsulting/prestashop/controller/ControllerPrestShop.class
 com/rgbconsulting/prestashop/mapper/ProductMapper.class

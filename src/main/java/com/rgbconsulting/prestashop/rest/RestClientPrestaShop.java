@@ -1,5 +1,7 @@
 package com.rgbconsulting.prestashop.rest;
 
+import com.rgbconsulting.prestashop.common.odoo.model.Product;
+import com.rgbconsulting.prestashop.model.PrestaShopParser;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -8,6 +10,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.List;
 
 /**
  *
@@ -71,32 +74,32 @@ public class RestClientPrestaShop {
     /*
         Get all the products from the prestashop
      */
-    public void getAllProduct(HttpClient client) {
+    public List<Product> getAllProducts(HttpClient client) {
         HttpRequest request = null;
-        HttpResponse response;
+        HttpResponse<String> response = null;
+
         try {
             request = HttpRequest.newBuilder()
                     .uri(new URI(URL + "/products/?display=full"))
                     .header("Authorization", "Basic " + encodedAuth)
                     .GET()
                     .build();
-        } catch (URISyntaxException u) {
-            u.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return List.of();
         }
 
-        if (request != null) {
-            try {
-                response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-                System.out.println("GET Status Code: " + response.statusCode());
-                System.out.println("GET Response Body: " + response.body());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("GET Status Code: " + response.statusCode());
+            // Parseamos el XML directamente a lista de Product
+            return PrestaShopParser.parseProducts(response.body());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return List.of();
         }
     }
+
 
     // POST
     /*

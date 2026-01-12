@@ -4,6 +4,7 @@ import com.rgb.training.app.common.odoo.types.Recordset;
 import com.rgb.training.app.common.odoo.types.Values;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
@@ -24,7 +25,7 @@ public class OdooConnection {
     private XmlRpcClient objectClient;
 
     public OdooConnection() {
-        
+
     }
 
     public OdooConnection(String url, String db, String uid, String pwd) throws MalformedURLException {
@@ -38,14 +39,14 @@ public class OdooConnection {
         this.objectClient = buildClient("%s/xmlrpc/2/object");
     }
 
-    public Boolean initializeConnection(String url, String db, String uid, String pwd) {
+    public Boolean initializeConnection(String url, String db, String username, String password) {
         try {
             this.url = url;
             this.db = db;
-            this.uid = uid;
-            this.pwd = pwd;
             this.commonClient = buildClient("%s/xmlrpc/2/common");
             this.objectClient = buildClient("%s/xmlrpc/2/object");
+            this.uid = String.valueOf(authenticate(username, password));
+            this.pwd = password;
         } catch (Exception e) {
             return false;
         }
@@ -156,6 +157,14 @@ public class OdooConnection {
             ids.add("");
         }
         return ids;
+    }
+
+    public Integer authenticate(String username, String password) throws XmlRpcException {
+        Object uid = commonClient.execute(
+                "authenticate",
+                new Object[]{db, username, password, new HashMap<>()}
+        );
+        return (Integer) uid;
     }
 
 }

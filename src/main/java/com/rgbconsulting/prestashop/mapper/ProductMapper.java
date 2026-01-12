@@ -14,6 +14,7 @@ public class ProductMapper {
     private long product_id;
     private String id_category;
     private String product_type;
+    private String reference;
 
     public ProductMapper() {
         this.id_manufacturer = "";
@@ -24,14 +25,18 @@ public class ProductMapper {
         this.product_id = -1;
         this.id_category = "-1";
         this.product_type = "standard";
+        this.reference = "";
     }
 
     public ProductMapper(String id_manufacturer,
             String id_supplier,
             String id_category_default,
             String product_name,
-            float price, long product_id, String id_category,
-            String product_type) {
+            float price,
+            long product_id,
+            String id_category,
+            String product_type,
+            String reference) {
         this.id_manufacturer = id_manufacturer;
         this.id_supplier = id_supplier;
         this.id_category_default = id_category_default;
@@ -40,6 +45,7 @@ public class ProductMapper {
         this.product_id = product_id;
         this.id_category = id_category;
         this.product_type = product_type;
+        this.reference = reference;
     }
 
     public String xmlProductPOST() {
@@ -54,7 +60,7 @@ public class ProductMapper {
                 + "    <id_tax_rules_group><![CDATA[1]]></id_tax_rules_group>\n"
                 + "    <type><![CDATA[1]]></type>\n"
                 + "    <id_shop_default><![CDATA[1]]></id_shop_default>\n"
-                + "    <reference><![CDATA[123456]]></reference>\n"
+                + "    <reference>"+ this.reference +"</reference>\n"
                 + "    <supplier_reference><![CDATA[ABCDEF]]></supplier_reference>\n"
                 + "    <ean13><![CDATA[1231231231231]]></ean13>\n"
                 + "    <state><![CDATA[1]]></state>\n"
@@ -107,7 +113,7 @@ public class ProductMapper {
                 + "    <id_tax_rules_group><![CDATA[1]]></id_tax_rules_group>\n"
                 + "    <type><![CDATA[1]]></type>\n"
                 + "    <id_shop_default><![CDATA[1]]></id_shop_default>\n"
-                + "    <reference><![CDATA[123456]]></reference>\n"
+                + "    <reference>" + this.reference + "</reference>\n"
                 + "    <supplier_reference><![CDATA[ABCDEF]]></supplier_reference>\n"
                 + "    <ean13><![CDATA[1231231231231]]></ean13>\n"
                 + "    <state><![CDATA[1]]></state>\n"

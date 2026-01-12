@@ -1,13 +1,12 @@
 package com.rgbconsulting.prestashop.rest;
 
+import com.rgb.training.app.common.odoo.types.Recordset;
+import com.rgb.training.app.common.odoo.types.Values;
+import com.rgbconsulting.prestashop.common.odoo.model.Product;
 import com.rgbconsulting.prestashop.common.odoo.model.connection.OdooConnection;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -15,61 +14,90 @@ import java.time.Duration;
  */
 public class RestClientOdoo {
 
-    private static final String URL = "http://localhost:8069/api/jta/client/";
-    private HttpClient client = initClient();
-    private static String url = "";
-    private static String db = "";
-    private static String uid = "";
-    private static String pwd = "";
-    OdooConnection oc;
+    private static final String URL = "http://localhost:8069/";
+    private static String db = "odoo16";
+    private static String uid = "2";
+    private static String pwd = "admin";
+    private OdooConnection oc;
 
-    /*
-        Iniciar el client
-     */
-    private HttpClient initClient() {
-        return client = HttpClient.newBuilder()
-                .version(HttpClient.Version.HTTP_1_1)
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .connectTimeout(Duration.ofSeconds(20))
-                .build();
-    }
+    public List<Product> getProducts() throws Exception {
+        Recordset rc;
+        List<Product> products = new ArrayList();
+        Product product;
 
-    // GET
-    /*
-        Get the product from odoo
-     */
-    public void get() {
-        HttpRequest request = null;
-        HttpResponse response;
         try {
-            request = HttpRequest.newBuilder()
-                    .uri(new URI(URL))
-                    .header("Authorization", "1234")
-                    .GET()
-                    .build();
-        } catch (URISyntaxException u) {
-            u.printStackTrace();
-        }
-        
-        if (request != null) {
-            try {
-                response = this.client.send(request, HttpResponse.BodyHandlers.ofString());
-
-                System.out.println("GET Status Code: " + response.statusCode());
-                System.out.println("GET Response Body: " + response.body());
-            } catch (Exception e) {
-                e.printStackTrace();
+            rc = odoo().search_read("product.template");
+            com.rgb.training.app.common.odoo.types.Record record;
+            for (int i = 0; i < rc.size(); i++) {
+                product = new Product();
+                record = rc.get(i);
+                product.setId((Integer) record.get("id"));
+                product.setName((String) record.get("name"));
+                product.setSales_price((Double) record.get("list_price"));
+                product.setCost((Double) record.get("standard_price"));
+                if (record.get("default_code") instanceof String) {
+                    product.setReference((String) record.get("default_code"));
+                } else {
+                    product.setReference(null); 
+                }
+                products.add(product);
             }
-        } else {
-            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
-        }
-    }
-    
-    private void startConnection () {
-        try {
-            oc = new OdooConnection(url, db, uid, pwd);
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return products;
+    }
+
+    public Integer createProduct(Product product) throws Exception {
+        int productId = 0;
+
+        try {
+            Values fields = Values.create(product.getFieldsAsHashMap());
+            productId = odoo().create("product.template", fields);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception(e);
+        }
+        return productId;
+    }
+
+    public Boolean updateProduct(Product product) throws Exception {
+        Boolean result = false;
+
+        try {
+            Values ids = Values.create(product.getId().intValue());
+            Values fields = Values.create(ids, product.getFieldsAsHashMap());
+            result = odoo().update("product.template", fields);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception(e);
+        }
+        return result;
+    }
+
+    public Recordset deleteProduct(Product product) throws Exception {
+        Recordset deleted = null;
+        try {
+            // Crear Values con el ID del cliente
+            Values ids = Values.create(product.getId());
+
+            // Ejecutar el borrado en Odoo
+            deleted = odoo().delete("product.template", ids);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            throw new Exception(e);
+        }
+        return deleted;
+    }
+
+    synchronized OdooConnection odoo() throws Exception {
+        if (this.oc == null) {
+            try {
+                this.oc = new OdooConnection(URL, db, uid, pwd);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+        return this.oc;
     }
 }
