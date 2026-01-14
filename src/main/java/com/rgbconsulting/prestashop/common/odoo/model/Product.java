@@ -18,15 +18,17 @@ public class Product {
     
     private String reference;         // SKU / referencia PrestaShop
     private Integer prestashopId;     // ID del producto en PrestaShop (opcional)
+    private String categ_id;          // Category ID
 
     public Product() { }
 
-    public Product(Integer id, String name, Double sales_price, Double cost, String reference) {
+    public Product(Integer id, String name, Double sales_price, Double cost, String reference, String categ_id) {
         this.id = id;
         this.name = name;
         this.sales_price = sales_price;
         this.cost = cost;
         this.reference = reference;
+        this.categ_id = categ_id;
     }
 
     // --- Getters y Setters ---
@@ -47,6 +49,9 @@ public class Product {
 
     public Integer getPrestashopId() { return prestashopId; }
     public void setPrestashopId(Integer prestashopId) { this.prestashopId = prestashopId; }
+    
+    public String getCategId() { return this.categ_id; }
+    public void setCategId(String categ_id) { this.categ_id = categ_id; } 
 
     // --- Convertir a mapa de campos para Odoo ---
     public Map<String, Object> getFieldsAsHashMap() {
@@ -56,6 +61,7 @@ public class Product {
         fields.put("list_price", this.sales_price);
         fields.put("standard_price", this.cost);
         fields.put("default_code", this.reference);
+        fields.put("categ_id", this.categ_id);
         return fields;
     }
 
@@ -88,6 +94,7 @@ public class Product {
                 + ", reference=" + reference
                 + ", name=" + name
                 + ", sales_price=" + sales_price
-                + ", cost=" + cost + "}";
+                + ", cost=" + cost
+                + ", categ_id=" + categ_id + "}";
     }
 }

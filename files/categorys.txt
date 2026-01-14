@@ -1,0 +1,10 @@
+PrestaShop / Odoo / PrestaShopId
+Raíz/All/1
+Clothes/Consumable/3
+Accessories/Expenses/6
+Art/Internal/9
+Saleable/Saleable/ 
+Office Furniture/Office Furniture/ 
+Services/Services/ 
+Saleable/Saleable/ 
+Software/Software/ 

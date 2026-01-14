@@ -31,4 +31,8 @@ public class ControllerPrestShop {
     public void deleteProductById(String id) {
         clientPrestaShop.deleteProductById(clientPrestaShop.initClient(), id);
     }
+    
+    public void uploadCategory(String xmlCategory) {
+        clientPrestaShop.uploadCategory(clientPrestaShop.initClient(), xmlCategory);
+    }
 }

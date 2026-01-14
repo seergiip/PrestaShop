@@ -12,6 +12,7 @@
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/common/utils/DataTypeParser.java
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/controller/ControllerOdoo.java
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/controller/ControllerPrestShop.java
+/home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/mapper/CategoryMapper.java
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/mapper/ProductMapper.java
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/model/PrestaShopParser.java
 /home/sergi/NetBeansProjects/PrestaShop/src/main/java/com/rgbconsulting/prestashop/model/PrestaShopProduct.java

@@ -6,6 +6,8 @@ com/rgbconsulting/prestashop/controller/ControllerPrestShop.class
 com/rgbconsulting/prestashop/mapper/ProductMapper.class
 com/rgbconsulting/prestashop/common/odoo/model/Product.class
 com/rgbconsulting/prestashop/common/utils/DataTypeParser.class
+com/rgbconsulting/prestashop/mapper/CategoryMapper.class
+com/rgbconsulting/prestashop/rest/RestClientPrestaShop$1.class
 com/rgbconsulting/prestashop/common/rest/RestServiceLog.class
 com/rgb/training/app/common/odoo/types/Domain.class
 com/rgbconsulting/prestashop/common/odoo/model/connection/OdooConnection.class

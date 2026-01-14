@@ -35,10 +35,15 @@ public class RestClientOdoo {
                 product.setName((String) record.get("name"));
                 product.setSales_price((Double) record.get("list_price"));
                 product.setCost((Double) record.get("standard_price"));
+                Object[] categ = (Object[]) record.get("categ_id");
+                String categorys = (String) categ[1];
+                String categoryName[] = categorys.split("/");
+                product.setCategId(categoryName[categoryName.length - 1].toString());
+
                 if (record.get("default_code") instanceof String) {
                     product.setReference((String) record.get("default_code"));
                 } else {
-                    product.setReference(null); 
+                    product.setReference(null);
                 }
                 products.add(product);
             }
