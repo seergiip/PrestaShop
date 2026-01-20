@@ -7,22 +7,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@XmlType(name = "Product")
+@XmlType(name = "ProductTemplate")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Product {
+public class ProductTemplate {
 
-    private Integer id;               // ID de Odoo
+    Integer id;               // ID de Odoo
     private String name;              // Nombre del producto
     private Double sales_price;       // Precio de venta (Odoo list price)
     private Double cost;              // Costo (Odoo standard price)
     
-    private String reference;         // SKU / referencia PrestaShop
+    String reference;         // SKU / referencia PrestaShop
     private Integer prestashopId;     // ID del producto en PrestaShop (opcional)
     private String categ_id;          // Category ID
 
-    public Product() { }
+    public ProductTemplate() { }
 
-    public Product(Integer id, String name, Double sales_price, Double cost, String reference, String categ_id) {
+    public ProductTemplate(Integer id, String name, Double sales_price, Double cost, String reference, String categ_id) {
         this.id = id;
         this.name = name;
         this.sales_price = sales_price;
@@ -69,8 +69,8 @@ public class Product {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Product)) return false;
-        Product other = (Product) o;
+        if (!(o instanceof ProductTemplate)) return false;
+        ProductTemplate other = (ProductTemplate) o;
 
         // Si tiene reference, lo usamos para comparar (PrestaShop)
         if (this.reference != null && other.reference != null) {

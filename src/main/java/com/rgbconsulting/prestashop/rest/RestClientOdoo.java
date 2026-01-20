@@ -2,11 +2,14 @@ package com.rgbconsulting.prestashop.rest;
 
 import com.rgb.training.app.common.odoo.types.Recordset;
 import com.rgb.training.app.common.odoo.types.Values;
-import com.rgbconsulting.prestashop.common.odoo.model.Product;
+import com.rgbconsulting.prestashop.common.odoo.model.ProductTemplate;
+import com.rgbconsulting.prestashop.common.odoo.model.Stock;
 import com.rgbconsulting.prestashop.common.odoo.model.connection.OdooConnection;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.rgb.training.app.common.odoo.types.Record;
+import com.rgbconsulting.prestashop.common.odoo.model.ProductProduct;
 
 /**
  *
@@ -20,16 +23,16 @@ public class RestClientOdoo {
     private static String pwd = "admin";
     private OdooConnection oc;
 
-    public List<Product> getProducts() throws Exception {
+    public List<ProductTemplate> getProductsTemplate() throws Exception {
         Recordset rc;
-        List<Product> products = new ArrayList();
-        Product product;
+        List<ProductTemplate> products = new ArrayList();
+        ProductTemplate product;
 
         try {
             rc = odoo().search_read("product.template");
-            com.rgb.training.app.common.odoo.types.Record record;
+            Record record;
             for (int i = 0; i < rc.size(); i++) {
-                product = new Product();
+                product = new ProductTemplate();
                 record = rc.get(i);
                 product.setId((Integer) record.get("id"));
                 product.setName((String) record.get("name"));
@@ -52,8 +55,29 @@ public class RestClientOdoo {
         }
         return products;
     }
+    
+    public List<ProductProduct> getProductsProduct() throws Exception {
+        Recordset rc;
+        List<ProductProduct> products = new ArrayList();
+        ProductProduct product;
 
-    public Integer createProduct(Product product) throws Exception {
+        try {
+            rc = odoo().search_read("product.product");
+            Record record;
+            for (int i = 0; i < rc.size(); i++) {
+                product = new ProductProduct();
+                record = rc.get(i);
+                product.setId((Integer) record.get("id"));
+                product.setProduct_tmpl_id((Integer) record.getId("product_tmpl_id"));
+                products.add(product);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    public Integer createProduct(ProductTemplate product) throws Exception {
         int productId = 0;
 
         try {
@@ -66,7 +90,7 @@ public class RestClientOdoo {
         return productId;
     }
 
-    public Boolean updateProduct(Product product) throws Exception {
+    public Boolean updateProduct(ProductTemplate product) throws Exception {
         Boolean result = false;
 
         try {
@@ -80,7 +104,7 @@ public class RestClientOdoo {
         return result;
     }
 
-    public Recordset deleteProduct(Product product) throws Exception {
+    public Recordset deleteProduct(ProductTemplate product) throws Exception {
         Recordset deleted = null;
         try {
             // Crear Values con el ID del cliente
@@ -93,6 +117,44 @@ public class RestClientOdoo {
             throw new Exception(e);
         }
         return deleted;
+    }
+
+    public List<Stock> getStocks() throws Exception {
+        Recordset rc;
+        List<Stock> stocks = new ArrayList();
+        Stock stock;
+
+        try {
+            rc = odoo().search_read("stock.quant");
+            Record record;
+            for (int i = 0; i < rc.size(); i++) {
+                stock = new Stock();
+                record = rc.get(i);
+                Object[] product = (Object[]) record.get("product_id");
+                Integer productId = (Integer) product[0];
+                stock.setProduct_id(productId);
+                stock.setQuantity((Double) record.get("quantity"));
+                stocks.add(stock);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return stocks;
+    }
+
+    public Double getQuantity(Integer product_id, List<Stock> stocks) {
+        Stock stock;
+        Double quantity = 0.0d;
+
+        for (int i = 0; i < stocks.size(); i++) {
+            stock = stocks.get(i);
+            if (stock.getProduct_id().equals(product_id)) {
+                quantity = stock.getQuantity();
+                break;
+            }
+        }
+
+        return quantity;
     }
 
     synchronized OdooConnection odoo() throws Exception {

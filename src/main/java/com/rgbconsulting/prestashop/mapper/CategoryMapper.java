@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.rgbconsulting.prestashop.mapper;
 
 /**
@@ -14,11 +10,13 @@ public class CategoryMapper {
     private String active;
     private String link_rewrite;
     
+    
     public CategoryMapper () {
         this.name = "";
         this.id_parent = "";
         this.active = "1";
         this.link_rewrite = "";
+        
     }
     
     public CategoryMapper (String name, String id_parent, String active) {
@@ -80,5 +78,14 @@ public class CategoryMapper {
                 + "    </associations>\n"
                 + "  </category>\n"
                 + "</prestashop>";
+    }
+    
+    
+    public String getLinkRewrite () {
+        return this.link_rewrite;
+    }
+
+    public String getName() {
+        return this.name;
     }
 }

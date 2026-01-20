@@ -4,11 +4,13 @@ com/rgbconsulting/prestashop/model/PrestaShopParser.class
 com/rgbconsulting/prestashop/PrestaShop.class
 com/rgbconsulting/prestashop/controller/ControllerPrestShop.class
 com/rgbconsulting/prestashop/mapper/ProductMapper.class
-com/rgbconsulting/prestashop/common/odoo/model/Product.class
 com/rgbconsulting/prestashop/common/utils/DataTypeParser.class
 com/rgbconsulting/prestashop/mapper/CategoryMapper.class
+com/rgbconsulting/prestashop/mapper/StockMapper.class
 com/rgbconsulting/prestashop/rest/RestClientPrestaShop$1.class
 com/rgbconsulting/prestashop/common/rest/RestServiceLog.class
+com/rgbconsulting/prestashop/common/odoo/model/ProductProduct.class
+com/rgbconsulting/prestashop/common/odoo/model/Stock.class
 com/rgb/training/app/common/odoo/types/Domain.class
 com/rgbconsulting/prestashop/common/odoo/model/connection/OdooConnection.class
 com/rgb/training/app/common/odoo/types/Values.class
@@ -18,4 +20,5 @@ com/rgb/training/app/common/odoo/types/Recordset.class
 com/rgbconsulting/prestashop/rest/RestClientPrestaShop.class
 com/rgbconsulting/prestashop/model/PrestaShopProduct.class
 com/rgbconsulting/prestashop/common/rest/SecurityKeyAuthorizer.class
+com/rgbconsulting/prestashop/common/odoo/model/ProductTemplate.class
 com/rgbconsulting/prestashop/common/rest/SecurityKeyAuth.class

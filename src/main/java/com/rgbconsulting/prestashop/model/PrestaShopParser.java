@@ -1,6 +1,6 @@
 package com.rgbconsulting.prestashop.model;
 
-import com.rgbconsulting.prestashop.common.odoo.model.Product;
+import com.rgbconsulting.prestashop.common.odoo.model.ProductTemplate;
 import java.io.StringReader;
 import java.util.*;
 import javax.xml.parsers.*;
@@ -12,8 +12,8 @@ import org.xml.sax.InputSource;
  */
 public class PrestaShopParser {
 
-    public static List<Product> parseProducts(String xml) throws Exception {
-        List<Product> products = new ArrayList<>();
+    public static List<ProductTemplate> parseProducts(String xml) throws Exception {
+        List<ProductTemplate> products = new ArrayList<>();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -44,7 +44,7 @@ public class PrestaShopParser {
             double sales_price = Double.parseDouble(getTextContent(productElem, "price").isEmpty() ? "0" : getTextContent(productElem, "price"));
             double cost = Double.parseDouble(getTextContent(productElem, "wholesale_price").isEmpty() ? "0" : getTextContent(productElem, "wholesale_price"));
 
-            Product product = new Product();
+            ProductTemplate product = new ProductTemplate();
             product.setPrestashopId(prestashopId);
             product.setReference(reference);
             product.setName(name);

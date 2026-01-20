@@ -1,5 +1,8 @@
 package com.rgbconsulting.prestashop.mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author sergi
@@ -12,9 +15,10 @@ public class ProductMapper {
     private String product_name;
     private float price;
     private long product_id;
-    private String id_category;
+    private List<String> categoryIds;
     private String product_type;
     private String reference;
+    private float unit_price;
 
     public ProductMapper() {
         this.id_manufacturer = "";
@@ -23,9 +27,10 @@ public class ProductMapper {
         this.product_name = "";
         this.price = 0.0f;
         this.product_id = -1;
-        this.id_category = "-1";
+        this.categoryIds = new ArrayList<>();
         this.product_type = "standard";
         this.reference = "";
+        this.unit_price = 0.0f;
     }
 
     public ProductMapper(String id_manufacturer,
@@ -34,18 +39,20 @@ public class ProductMapper {
             String product_name,
             float price,
             long product_id,
-            String id_category,
+            List<String> categoryIds,
             String product_type,
-            String reference) {
+            String reference,
+            float unit_price) {
         this.id_manufacturer = id_manufacturer;
         this.id_supplier = id_supplier;
         this.id_category_default = id_category_default;
         this.product_name = product_name;
         this.price = price;
         this.product_id = product_id;
-        this.id_category = id_category;
+        this.categoryIds = categoryIds;
         this.product_type = product_type;
         this.reference = reference;
+        this.unit_price = unit_price;
     }
 
     public String xmlProductPOST() {
@@ -60,13 +67,13 @@ public class ProductMapper {
                 + "    <id_tax_rules_group><![CDATA[1]]></id_tax_rules_group>\n"
                 + "    <type><![CDATA[1]]></type>\n"
                 + "    <id_shop_default><![CDATA[1]]></id_shop_default>\n"
-                + "    <reference>"+ this.reference +"</reference>\n"
+                + "    <reference>" + this.reference + "</reference>\n"
                 + "    <supplier_reference><![CDATA[ABCDEF]]></supplier_reference>\n"
                 + "    <ean13><![CDATA[1231231231231]]></ean13>\n"
                 + "    <state><![CDATA[1]]></state>\n"
-                + "    <product_type>"  + this.product_type +"</product_type>\n"
+                + "    <product_type>" + this.product_type + "</product_type>\n"
                 + "    <price>" + this.price + "</price>\n"
-                + "    <unit_price><![CDATA[123.45]]></unit_price>\n"
+                + "    <unit_price>" + this.unit_price + "</unit_price>\n"
                 + "    <active><![CDATA[1]]></active>\n"
                 + "    <meta_description>\n"
                 + "        <language id=\"1\"><![CDATA[Description]]></language>\n"
@@ -91,16 +98,14 @@ public class ProductMapper {
                 + "    </description_short>\n"
                 + "    <associations>\n"
                 + "        <categories>\n"
-                + "            <category>\n"
-                + "                <id>" + this.id_category + "</id>\n"
-                + "            </category>\n"
+                +               assignCategories()
                 + "        </categories>\n"
                 + "    </associations>\n"
                 + "</product>\n"
                 + "</prestashop>";
     }
-    
-    public String xmlProductPUT () {
+
+    public String xmlProductPUT() {
         return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                 + "<prestashop xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n"
                 + "<product>\n"
@@ -144,15 +149,13 @@ public class ProductMapper {
                 + "    </description_short>\n"
                 + "    <associations>\n"
                 + "        <categories>\n"
-                + "            <category>\n"
-                + "                <id>" + this.id_category + "</id>\n"
-                + "            </category>\n"
+                +             assignCategories()
                 + "        </categories>\n"
                 + "    </associations>\n"
                 + "</product>\n"
                 + "</prestashop>";
     }
-    
+
     private void setId_manufacturer(String id_manufacturer) {
         this.id_manufacturer = id_manufacturer;
     }
@@ -172,4 +175,14 @@ public class ProductMapper {
     private void setPrice(float price) {
         this.price = price;
     }
+
+    private String assignCategories() {
+        String xml = "";
+        for (String id : this.categoryIds) {
+            xml += "<category><id>" + id + "</id></category>";
+        }
+        return xml;
+    }
+    
+    
 }
