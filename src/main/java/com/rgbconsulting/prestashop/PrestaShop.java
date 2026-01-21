@@ -33,7 +33,7 @@ public class PrestaShop {
         List<ProductTemplate> productsOdoo = controllerOdoo.getProductsTemplate();
         //Llista de stock de tots els productes
         List<Stock> stocksOdoo = controllerOdoo.getStocks();
-        
+
         List<ProductProduct> productsProductOdoo = controllerOdoo.getProductsProduct();
 
         // Creamos un mapa de referencia → producto para búsqueda rápida
@@ -74,7 +74,7 @@ public class PrestaShop {
                         1 //unit_price
                 );
                 // Creacio del producte a PrestaShop i me quedo el seu id
-                String PrestaShopProduct_id = cps.getProductId(cps.uploadProduct(mapperPOST.xmlProductPOST()));
+                String PrestaShopProduct_id = cps.getProductIdFromResponse(cps.uploadProduct(mapperPOST.xmlProductPOST()));
 
                 // Creacio de el stock
                 String stock_id = cps.getIdOfStock(cps.getAvailableStock(PrestaShopProduct_id));
@@ -85,14 +85,13 @@ public class PrestaShop {
                         productProductTmpID = prod.getId();
                     }
                 }
-                
+
                 String quantity = String.valueOf(
                         controllerOdoo
                                 .getQuantity(productProductTmpID, stocksOdoo)
                                 .intValue()
                 );
 
-                
                 StockMapper stockMapper = new StockMapper(stock_id, PrestaShopProduct_id, quantity);
                 // li paso el id del producte
                 cps.uploadStock(stockMapper.xmlStock());
@@ -138,11 +137,26 @@ public class PrestaShop {
                     );
 
                     // Faig l'actualitzacio del producte
-                    String product_id = cps.getProductId(cps.updateProduct(mapperPUT.xmlProductPUT()));
+                    cps.updateProduct(mapperPUT.xmlProductPUT()); // aixo retorna un response == null 
+                    // Agafo el id del product
+                    String PrestaShopProduct_id = cps.getProductIdFromResponse(cps.getProductByReference(odooProduct.getReference()));
                     // Actualitzacio de el stock
-                    String quantity = controllerOdoo.getQuantity(Integer.parseInt(product_id), stocksOdoo).toString();
-                    String stock_id = cps.getIdOfStock(cps.getAvailableStock(product_id));
-                    StockMapper stockMapper = new StockMapper(stock_id, product_id, quantity);
+                    String stock_id = cps.getIdOfStock(cps.getAvailableStock(PrestaShopProduct_id));
+                    Integer productTempId = odooProduct.getId();
+                    Integer productProductTmpID = null;
+                    for (ProductProduct prod : productsProductOdoo) {
+                        if (prod.getProduct_tmpl_id().equals(productTempId)) {
+                            productProductTmpID = prod.getId();
+                        }
+                    }
+
+                    String quantity = String.valueOf(
+                            controllerOdoo
+                                    .getQuantity(productProductTmpID, stocksOdoo)
+                                    .intValue()
+                    );
+
+                    StockMapper stockMapper = new StockMapper(stock_id, PrestaShopProduct_id, quantity);
                     // li paso el id del producte
                     cps.uploadStock(stockMapper.xmlStock());
                 } else {
@@ -242,5 +256,8 @@ public class PrestaShop {
     private static String getId_category_default(List<String> categories) {
         return categories.get(categories.size() - 1);
     }
+    
+    
+    
 
 }

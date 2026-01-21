@@ -11,12 +11,12 @@ import java.util.Objects;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProductTemplate {
 
-    Integer id;               // ID de Odoo
+    Integer id;                       // ID de Odoo
     private String name;              // Nombre del producto
     private Double sales_price;       // Precio de venta (Odoo list price)
     private Double cost;              // Costo (Odoo standard price)
     
-    String reference;         // SKU / referencia PrestaShop
+    String reference;                 // Referencia PrestaShop
     private Integer prestashopId;     // ID del producto en PrestaShop (opcional)
     private String categ_id;          // Category ID
 

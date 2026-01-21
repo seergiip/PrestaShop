@@ -57,7 +57,11 @@ public class ControllerPrestShop {
         clientPrestaShop.updateStock(clientPrestaShop.initClient(), xmlStock, stock_id);
     }
     
-    public String getProductId(HttpResponse response) {
-        return clientPrestaShop.getProductId(response);
+    public String getProductIdFromResponse(HttpResponse response) {
+        return clientPrestaShop.getProductIdFromResponse(response);
+    }
+    
+    public HttpResponse getProductByReference(String reference) {
+        return clientPrestaShop.getProductByReference(clientPrestaShop.initClient(), reference);
     }
 }

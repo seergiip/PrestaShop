@@ -406,7 +406,7 @@ public class RestClientPrestaShop {
         }
     }
 
-    public String getProductId(HttpResponse<String> response) {
+    public String getProductIdFromResponse(HttpResponse<String> response) {
         try {
             String xml = response.body();
 
@@ -427,5 +427,33 @@ public class RestClientPrestaShop {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public HttpResponse getProductByReference(HttpClient client, String reference) {
+        HttpRequest request = null;
+        HttpResponse response = null;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI(URL + "/products?filter[reference]=" + reference + "&display=full"))
+                    .header("Authorization", "Basic " + encodedAuth)
+                    .GET()
+                    .build();
+        } catch (URISyntaxException u) {
+            u.printStackTrace();
+        }
+
+        if (request != null) {
+            try {
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println("GET Status Code: " + response.statusCode());
+                //System.out.println("GET Response Body: " + response.body());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
+        }
+        return response;
     }
 }
