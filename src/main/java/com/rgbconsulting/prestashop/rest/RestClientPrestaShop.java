@@ -1,7 +1,17 @@
 package com.rgbconsulting.prestashop.rest;
 
 import com.rgbconsulting.prestashop.common.odoo.model.ProductTemplate;
+import com.rgbconsulting.prestashop.mapper.CategoryMapper;
 import com.rgbconsulting.prestashop.model.PrestaShopParser;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -16,6 +26,12 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Properties;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.*;
@@ -25,20 +41,35 @@ import org.xml.sax.InputSource;
  *
  * @author sergi
  *
- * What does it do? -> Connexion to PrestaShop (From here you can GET, PUT,
- * DELETE, UPDATE all the products of the shop.
+ *
  */
 public class RestClientPrestaShop {
 
-    private static final String URL = "https://prestashopsergi.com/api";
-    private static final String KEY = "U69EHDTLP19486EPGYJUFEFPXPQX7Q11";
-    private static final String auth = KEY + ":";
-    private static final String encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+    //private static final String URL = "https://prestashopsergi.com/api";
+    //private static final String KEY = "U69EHDTLP19486EPGYJUFEFPXPQX7Q11";
+    private String URL = "";
+    private String KEY = "";
+    private String auth = "";
+    private String encodedAuth = "";
+
+    public void loadProperties() throws FileNotFoundException, IOException {
+        Properties p = new Properties();
+        p.load(new BufferedReader(new FileReader("files/properties/config.properties")));
+        this.URL = p.getProperty("url");
+        this.KEY = p.getProperty("key");
+        this.auth = KEY + ":";
+        this.encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
+
+        if (URL == null || KEY == null) {
+            throw new IllegalStateException("Faltan variables de entorno de PrestaShop");
+        }
+    }
 
     /*
         Iniciar el client
      */
     public HttpClient initClient() {
+
         try {
             System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");
 
@@ -112,8 +143,8 @@ public class RestClientPrestaShop {
 
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/products/?display=full"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/products/?display=full"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .GET()
                     .build();
         } catch (URISyntaxException e) {
@@ -143,8 +174,8 @@ public class RestClientPrestaShop {
         HttpResponse response = null;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/products/"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/products/"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .POST(BodyPublishers.ofString(xmlProduct))
                     .build();
         } catch (URISyntaxException u) {
@@ -177,8 +208,8 @@ public class RestClientPrestaShop {
         HttpResponse response = null;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/products/"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/products/"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .PUT(BodyPublishers.ofString(xmlProduct))
                     .build();
         } catch (URISyntaxException u) {
@@ -202,15 +233,15 @@ public class RestClientPrestaShop {
 
     // DELETE
     /*
-        Deletes a product from the prestashop
+        Deletes a product from the prestashop using the id
      */
     public void deleteProductById(HttpClient client, String id) {
         HttpRequest request = null;
         HttpResponse response;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/products/" + id))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/products/" + id))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .DELETE()
                     .build();
         } catch (URISyntaxException u) {
@@ -242,8 +273,8 @@ public class RestClientPrestaShop {
         HttpResponse response = null;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/categories"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/categories"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .POST(BodyPublishers.ofString(xmlCategory))
                     .build();
         } catch (URISyntaxException u) {
@@ -273,7 +304,6 @@ public class RestClientPrestaShop {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
-            // Tomamos el primer <category> de la respuesta
             Element category = (Element) doc.getElementsByTagName("category").item(0);
 
             if (category != null) {
@@ -293,7 +323,7 @@ public class RestClientPrestaShop {
                 }
 
                 System.out.println("Created category: ID=" + id + " | Name=" + name);
-                return id; // Retornamos solo el ID
+                return id;
             }
 
         } catch (Exception e) {
@@ -307,8 +337,8 @@ public class RestClientPrestaShop {
         HttpResponse response = null;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/stock_availables?filter[id_product]=" + id_product + "&display=full"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/stock_availables?filter[id_product]=" + id_product + "&display=full"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .GET()
                     .build();
         } catch (URISyntaxException u) {
@@ -338,7 +368,6 @@ public class RestClientPrestaShop {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
-            // Tomamos el primer <category> de la respuesta
             Element category = (Element) doc.getElementsByTagName("stock_available").item(0);
 
             if (category != null) {
@@ -359,8 +388,8 @@ public class RestClientPrestaShop {
 
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/stock_availables/"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/stock_availables/"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .header("Content-Type", "application/xml")
                     .method("PATCH", BodyPublishers.ofString(xmlStock))
                     .build();
@@ -384,8 +413,8 @@ public class RestClientPrestaShop {
         HttpResponse response;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/stock_availables/"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/stock_availables/"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .PUT(BodyPublishers.ofString(xmlStock))
                     .build();
         } catch (URISyntaxException u) {
@@ -414,7 +443,6 @@ public class RestClientPrestaShop {
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.parse(new InputSource(new StringReader(xml)));
 
-            // Tomamos el primer <category> de la respuesta
             Element product = (Element) doc.getElementsByTagName("product").item(0);
 
             if (product != null) {
@@ -428,14 +456,14 @@ public class RestClientPrestaShop {
         }
         return null;
     }
-    
+
     public HttpResponse getProductByReference(HttpClient client, String reference) {
         HttpRequest request = null;
         HttpResponse response = null;
         try {
             request = HttpRequest.newBuilder()
-                    .uri(new URI(URL + "/products?filter[reference]=" + reference + "&display=full"))
-                    .header("Authorization", "Basic " + encodedAuth)
+                    .uri(new URI(this.URL + "/products?filter[reference]=" + reference + "&display=full"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
                     .GET()
                     .build();
         } catch (URISyntaxException u) {
@@ -455,5 +483,146 @@ public class RestClientPrestaShop {
             System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
         }
         return response;
+    }
+
+    public HttpResponse getPrestaShopCategories(HttpClient client) {
+        HttpRequest request = null;
+        HttpResponse response = null;
+        try {
+            request = HttpRequest.newBuilder()
+                    .uri(new URI(this.URL + "/categories?display=full"))
+                    .header("Authorization", "Basic " + this.encodedAuth)
+                    .GET()
+                    .build();
+        } catch (URISyntaxException u) {
+            u.printStackTrace();
+        }
+
+        if (request != null) {
+            try {
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                System.out.println("GET Status Code: " + response.statusCode());
+                //System.out.println("GET Response Body: " + response.body());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Error: La solicitud no ha pogut ser creada degut a un problema amb la URI.");
+        }
+        return response;
+    }
+
+    public List<CategoryMapper> getPrestaShopCategoriesToList(HttpResponse response) {
+        List<CategoryMapper> categories = new ArrayList<>();
+
+        try {
+            String xml = (String) response.body();
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(xml)));
+
+            NodeList categoryNodes = doc.getElementsByTagName("category");
+
+            for (int i = 0; i < categoryNodes.getLength(); i++) {
+                Element categoryElement = (Element) categoryNodes.item(i);
+
+                String id_parent = categoryElement
+                        .getElementsByTagName("id_parent")
+                        .item(0)
+                        .getTextContent()
+                        .trim();
+
+                String name = categoryElement
+                        .getElementsByTagName("name")
+                        .item(0)
+                        .getTextContent()
+                        .trim();
+
+                String active = categoryElement
+                        .getElementsByTagName("active")
+                        .item(0)
+                        .getTextContent()
+                        .trim();
+
+                CategoryMapper categoryMapper
+                        = new CategoryMapper(name, id_parent, active);
+
+                categories.add(categoryMapper);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return categories;
+    }
+
+    public void uploadImage(
+            HttpClient client,
+            File imageFile,
+            String productReference
+    ) throws Exception {
+
+        // Primero obtenemos el producto de PrestaShop usando la referencia
+        HttpResponse<String> getResponse = getProductByReference(client, productReference);
+
+        String statusBody = getResponse.body();
+        int statusCode = getResponse.statusCode();
+
+        if (statusCode != 200) {
+            throw new RuntimeException(
+                    "No se pudo obtener el producto en PrestaShop. HTTP " + statusCode + " -> " + statusBody
+            );
+        }
+
+        // Parseamos la respuesta para sacar el ID real de PrestaShop
+        String prestashopProductId = getProductIdFromResponse(getResponse);
+
+        if (prestashopProductId == null || prestashopProductId.isEmpty()) {
+            throw new RuntimeException(
+                    "No se encontró el producto en PrestaShop con la referencia: " + productReference
+            );
+        }
+
+        String boundary = "----Boundary" + System.currentTimeMillis();
+        String CRLF = "\r\n";
+
+        // Construimos el body multipart
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        // Header multipart
+        baos.write(("--" + boundary + CRLF).getBytes(StandardCharsets.UTF_8));
+        baos.write(("Content-Disposition: form-data; name=\"image\"; filename=\""
+                + imageFile.getName() + "\"" + CRLF).getBytes(StandardCharsets.UTF_8));
+        baos.write(("Content-Type: image/jpeg" + CRLF).getBytes(StandardCharsets.UTF_8));
+        baos.write(CRLF.getBytes(StandardCharsets.UTF_8));
+
+        // Binario de la imagen
+        Files.copy(imageFile.toPath(), baos);
+
+        // Cierre multipart
+        baos.write(CRLF.getBytes(StandardCharsets.UTF_8));
+        baos.write(("--" + boundary + "--" + CRLF).getBytes(StandardCharsets.UTF_8));
+
+        byte[] multipartBytes = baos.toByteArray();
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(this.URL + "/images/products/" + prestashopProductId))
+                .header("Authorization", "Basic " + this.encodedAuth)
+                .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBytes))
+                .build();
+
+        HttpResponse<String> response
+                = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        int uploadStatus = response.statusCode();
+        if (uploadStatus != 200 && uploadStatus != 201) {
+            throw new RuntimeException(
+                    "Error subiendo imagen. HTTP " + uploadStatus + " -> " + response.body()
+            );
+        }
     }
 }

@@ -1,3 +1,4 @@
+com/rgbconsulting/prestashop/app/AppScheduledTasks.class
 com/rgbconsulting/prestashop/mapper/ProductMapper.class
 com/rgbconsulting/prestashop/common/utils/DataTypeParser.class
 com/rgbconsulting/prestashop/mapper/CategoryMapper.class
@@ -10,6 +11,7 @@ com/rgb/training/app/common/odoo/types/Recordset.class
 com/rgbconsulting/prestashop/model/PrestaShopProduct.class
 com/rgbconsulting/prestashop/common/rest/SecurityKeyAuthorizer.class
 com/rgbconsulting/prestashop/common/rest/SecurityKeyAuth.class
+com/rgbconsulting/prestashop/common/odoo/model/ProductCategory.class
 com/rgbconsulting/prestashop/common/rest/RestServiceLogging.class
 com/rgbconsulting/prestashop/rest/RestClientOdoo.class
 com/rgbconsulting/prestashop/model/PrestaShopParser.class

@@ -1,7 +1,10 @@
 package com.rgbconsulting.prestashop.controller;
 
 import com.rgbconsulting.prestashop.common.odoo.model.ProductTemplate;
+import com.rgbconsulting.prestashop.mapper.CategoryMapper;
 import com.rgbconsulting.prestashop.rest.RestClientPrestaShop;
+import java.io.File;
+import java.io.IOException;
 import java.net.http.HttpResponse;
 import java.util.List;
 
@@ -12,6 +15,16 @@ import java.util.List;
 public class ControllerPrestShop {
 
     RestClientPrestaShop clientPrestaShop = new RestClientPrestaShop();
+    
+    // Load Properties
+    public ControllerPrestShop() {
+        try {
+            clientPrestaShop.loadProperties();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
 
     public void getProductByIdResponse(String id) {
         clientPrestaShop.getProductbyId(clientPrestaShop.initClient(), id);
@@ -63,5 +76,22 @@ public class ControllerPrestShop {
     
     public HttpResponse getProductByReference(String reference) {
         return clientPrestaShop.getProductByReference(clientPrestaShop.initClient(), reference);
+    }
+    
+    public HttpResponse getPrestaShopCategories () {
+        return clientPrestaShop.getPrestaShopCategories(clientPrestaShop.initClient());
+    }
+    
+    public List<CategoryMapper> getPrestaShopCategoriesToList(HttpResponse response) {
+        return clientPrestaShop.getPrestaShopCategoriesToList(clientPrestaShop.getPrestaShopCategories(clientPrestaShop.initClient()));
+    }
+    
+    public void uploadImage (File imageFile,
+            String productReference) {
+        try {
+            clientPrestaShop.uploadImage(clientPrestaShop.initClient(), imageFile, productReference);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

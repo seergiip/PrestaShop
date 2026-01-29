@@ -27,7 +27,6 @@ public class PrestaShopSyncService {
     public void sync() {
         ControllerOdoo controllerOdoo = new ControllerOdoo();
         ControllerPrestShop cps = new ControllerPrestShop();
-
         List<ProductTemplate> prestashopProducts = cps.getAllProducts();
         List<ProductTemplate> odooProducts = controllerOdoo.getProductsTemplate();
         List<Stock> stocksOdoo = controllerOdoo.getStocks();
@@ -47,7 +46,11 @@ public class PrestaShopSyncService {
         }
     }
 
-    private static List<String> getPrestaShopCategories(
+    private static void uploadImages(ControllerOdoo controllerOdoo, ControllerPrestShop controllerPrestShop, ProductTemplate productTemplate) {
+        controllerPrestShop.uploadImage(controllerOdoo.downloadImage(productTemplate.getImageFile()), productTemplate.getReference());
+    }
+
+    private static List<String> getPrestaShopCategoriesFromTxtFile(
             ProductTemplate odooProduct,
             ControllerPrestShop cps) {
         List<String> prestaShopCategories = new ArrayList<>();
@@ -193,32 +196,36 @@ public class PrestaShopSyncService {
         System.out.println("-------------------------------------------------------------");
         System.out.println("Creando producto en PrestaShop: " + odooProduct.getName());
 
-        List<String> categories = getPrestaShopCategories(odooProduct, cps);
+        List<String> categories = getPrestaShopCategoriesFromTxtFile(odooProduct, cps);
         String defaultCategory = getId_category_default(categories);
-
-        ProductMapper mapper = new ProductMapper(
-                "1",
-                "1",
-                defaultCategory,
-                odooProduct.getName(),
-                odooProduct.getSales_price().floatValue(),
-                1,
-                categories,
-                "standard",
-                odooProduct.getReference(),
-                1
-        );
-
-        String prestashopProductId = cps.getProductIdFromResponse(cps.uploadProduct(mapper.xmlProductPOST()));
-
-        updateStock(
-                prestashopProductId,
-                odooProduct,
-                controllerOdoo,
-                cps,
-                stocksOdoo,
-                productsProductOdoo
-        );
+        if (odooProduct.getReference() != null) {
+            ProductMapper mapper = new ProductMapper(
+                    "1",
+                    "1",
+                    defaultCategory,
+                    odooProduct.getName(),
+                    odooProduct.getSales_price().floatValue(),
+                    1,
+                    categories,
+                    odooProduct.getReference(),
+                    1
+            );
+            // Creacio del product
+            String prestashopProductId = cps.getProductIdFromResponse(cps.uploadProduct(mapper.xmlProductPOST()));
+            // Creacio del stock
+            updateStock(
+                    prestashopProductId,
+                    odooProduct,
+                    controllerOdoo,
+                    cps,
+                    stocksOdoo,
+                    productsProductOdoo
+            );
+            // Creacio de la seva imatge
+            uploadImages(controllerOdoo, cps, odooProduct);
+        } else {
+            System.out.println("Error en crear el producte la referencia es null. Siusplau assigna-li una referencia al producte.");
+        }
     }
 
     private static void updateProductInPrestashop(
@@ -232,7 +239,7 @@ public class PrestaShopSyncService {
         System.out.println("-------------------------------------------------------------");
         System.out.println("Actualizando producto en PrestaShop: " + odooProduct.getName());
 
-        List<String> categories = getPrestaShopCategories(odooProduct, cps);
+        List<String> categories = getPrestaShopCategoriesFromTxtFile(odooProduct, cps);
         String defaultCategory = getId_category_default(categories);
 
         ProductMapper mapper = new ProductMapper(
@@ -243,18 +250,17 @@ public class PrestaShopSyncService {
                 odooProduct.getSales_price().floatValue(),
                 psProduct.getPrestashopId(),
                 categories,
-                "standard",
                 odooProduct.getReference(),
                 1
         );
-
+        // Actualitzacio del producte
         cps.updateProduct(mapper.xmlProductPUT());
-
+       
         String prestashopProductId
                 = cps.getProductIdFromResponse(
                         cps.getProductByReference(odooProduct.getReference())
                 );
-
+        // Actualitzacio del seu stock
         updateStock(
                 prestashopProductId,
                 odooProduct,
@@ -263,6 +269,9 @@ public class PrestaShopSyncService {
                 stocksOdoo,
                 productsProductOdoo
         );
+
+        // Actualitzacio de la seva imatge
+        uploadImages(controllerOdoo, cps, odooProduct);
     }
 
     private static void updateStock(
@@ -296,6 +305,12 @@ public class PrestaShopSyncService {
             }
         }
         return null;
+    }
+
+    private static String normalize(String s) {
+        return s.toLowerCase()
+                .trim()
+                .replaceAll("\\s+", " ");
     }
 
 }

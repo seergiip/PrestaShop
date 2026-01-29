@@ -88,4 +88,12 @@ public class CategoryMapper {
     public String getName() {
         return this.name;
     }
+
+    public String getId_parent() {
+        return this.id_parent;
+    }
+
+    public String getId() {
+        return null; //acabar de fer
+    }
 }

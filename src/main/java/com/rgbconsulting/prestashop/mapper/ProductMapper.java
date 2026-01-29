@@ -16,7 +16,6 @@ public class ProductMapper {
     private float price;
     private long product_id;
     private List<String> categoryIds;
-    private String product_type;
     private String reference;
     private float unit_price;
 
@@ -28,7 +27,6 @@ public class ProductMapper {
         this.price = 0.0f;
         this.product_id = -1;
         this.categoryIds = new ArrayList<>();
-        this.product_type = "standard";
         this.reference = "";
         this.unit_price = 0.0f;
     }
@@ -40,7 +38,6 @@ public class ProductMapper {
             float price,
             long product_id,
             List<String> categoryIds,
-            String product_type,
             String reference,
             float unit_price) {
         this.id_manufacturer = id_manufacturer;
@@ -50,7 +47,6 @@ public class ProductMapper {
         this.price = price;
         this.product_id = product_id;
         this.categoryIds = categoryIds;
-        this.product_type = product_type;
         this.reference = reference;
         this.unit_price = unit_price;
     }
@@ -71,7 +67,6 @@ public class ProductMapper {
                 + "    <supplier_reference><![CDATA[ABCDEF]]></supplier_reference>\n"
                 + "    <ean13><![CDATA[1231231231231]]></ean13>\n"
                 + "    <state><![CDATA[1]]></state>\n"
-                + "    <product_type>" + this.product_type + "</product_type>\n"
                 + "    <price>" + this.price + "</price>\n"
                 + "    <unit_price>" + this.unit_price + "</unit_price>\n"
                 + "    <active><![CDATA[1]]></active>\n"

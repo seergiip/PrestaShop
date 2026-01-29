@@ -9,7 +9,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import com.rgb.training.app.common.odoo.types.Record;
+import com.rgbconsulting.prestashop.common.odoo.model.ProductCategory;
 import com.rgbconsulting.prestashop.common.odoo.model.ProductProduct;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  *
@@ -155,6 +161,49 @@ public class RestClientOdoo {
         }
 
         return quantity;
+    }
+    
+    public List<ProductCategory> getProductsCategory() throws Exception {
+        Recordset rc;
+        List<ProductCategory> products = new ArrayList();
+        ProductCategory product;
+
+        try {
+            rc = odoo().search_read("product.category");
+            Record record;
+            for (int i = 0; i < rc.size(); i++) {
+                product = new ProductCategory();
+                record = rc.get(i);
+                product.setId((Integer) record.get("id"));
+                product.setParent_Id((Integer) record.get("parent_id"));
+                product.setComplete_Name((String) record.get("complete_name"));
+                products.add(product);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+    
+    public File downloadImage(String imageUrl) throws Exception {
+        URL url = new URL(imageUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        File tempFile = File.createTempFile("odoo_image_", ".jpg");
+
+        try (InputStream in = conn.getInputStream();
+             FileOutputStream out = new FileOutputStream(tempFile)) {
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
+        }
+
+        return tempFile;
     }
 
     synchronized OdooConnection odoo() throws Exception {
