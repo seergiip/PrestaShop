@@ -3,7 +3,6 @@ package com.rgbconsulting.prestashop.common.odoo.model;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlType;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,7 +19,6 @@ public class ProductTemplate {
     private String reference;                 // Referencia PrestaShop
     private Integer prestashopId;     // ID del producto en PrestaShop (opcional)
     private String categ_id;          // Category ID
-    private String imageFile;
 
     public ProductTemplate() {
     }

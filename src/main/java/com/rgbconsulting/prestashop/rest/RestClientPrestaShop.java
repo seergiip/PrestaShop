@@ -9,9 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -26,12 +23,12 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.StringReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Properties;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import org.w3c.dom.*;
@@ -45,18 +42,19 @@ import org.xml.sax.InputSource;
  */
 public class RestClientPrestaShop {
 
-    //private static final String URL = "https://prestashopsergi.com/api";
-    //private static final String KEY = "U69EHDTLP19486EPGYJUFEFPXPQX7Q11";
     private String URL = "";
     private String KEY = "";
     private String auth = "";
     private String encodedAuth = "";
+    private String secret_key = "dXJ8pOkykWANFh8M";
 
     public void loadProperties() throws FileNotFoundException, IOException {
         Properties p = new Properties();
         p.load(new BufferedReader(new FileReader("files/properties/config.properties")));
-        this.URL = p.getProperty("url");
-        this.KEY = p.getProperty("key");
+        String url = p.getProperty("url");
+        this.URL = decrypt(url, secret_key);
+        String key = p.getProperty("key");
+        this.KEY = decrypt(key, secret_key);
         this.auth = KEY + ":";
         this.encodedAuth = Base64.getEncoder().encodeToString(auth.getBytes());
 
@@ -64,6 +62,31 @@ public class RestClientPrestaShop {
             throw new IllegalStateException("Faltan variables de entorno de PrestaShop");
         }
     }
+
+    public String decrypt(String encryptedData, String secret) {
+        try {
+            // Preparar clave y cifrador
+            SecretKeySpec key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
+            Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding"); // Sin padding automático
+            cipher.init(Cipher.DECRYPT_MODE, key);
+
+            // Decodificar Base64
+            byte[] decodedVal = Base64.getDecoder().decode(encryptedData);
+
+            // Desencriptar
+            byte[] decryptedBytes = cipher.doFinal(decodedVal);
+
+            // Quitar padding manual (último byte indica cantidad de padding)
+            int pad = decryptedBytes[decryptedBytes.length - 1];
+            int length = decryptedBytes.length - pad;
+            return new String(decryptedBytes, 0, length, StandardCharsets.UTF_8);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     /*
         Iniciar el client

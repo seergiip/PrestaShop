@@ -1,5 +1,6 @@
 package com.rgbconsulting.prestashop.sync;
 
+import com.rgbconsulting.prestashop.common.odoo.model.ProductCategory;
 import com.rgbconsulting.prestashop.common.odoo.model.ProductProduct;
 import com.rgbconsulting.prestashop.common.odoo.model.ProductTemplate;
 import com.rgbconsulting.prestashop.common.odoo.model.Stock;
@@ -8,6 +9,7 @@ import com.rgbconsulting.prestashop.controller.ControllerPrestShop;
 import com.rgbconsulting.prestashop.mapper.CategoryMapper;
 import com.rgbconsulting.prestashop.mapper.ProductMapper;
 import com.rgbconsulting.prestashop.mapper.StockMapper;
+import com.rgbconsulting.prestashop.model.CategoryOdooPrestashop;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -27,6 +29,7 @@ public class PrestaShopSyncService {
     public void sync() {
         ControllerOdoo controllerOdoo = new ControllerOdoo();
         ControllerPrestShop cps = new ControllerPrestShop();
+
         List<ProductTemplate> prestashopProducts = cps.getAllProducts();
         List<ProductTemplate> odooProducts = controllerOdoo.getProductsTemplate();
         List<Stock> stocksOdoo = controllerOdoo.getStocks();
@@ -50,6 +53,43 @@ public class PrestaShopSyncService {
         controllerPrestShop.uploadImage(controllerOdoo.downloadImage(productTemplate.getImageFile()), productTemplate.getReference());
     }
 
+    private static void syncCategories(ControllerOdoo cntOdoo, ControllerPrestShop cntPrstShop) {
+        // Categories of Odoo
+        List<ProductCategory> odooCategories = cntOdoo.getProductsCategory();
+        // Categories of PrestaShop
+        List<CategoryMapper> prestaShopCategories = cntPrstShop.getPrestaShopCategoriesToList(cntPrstShop.getPrestaShopCategories());
+        // Categories of PrestaShop & Odoo
+        List<CategoryOdooPrestashop> odooPrestaCategories = cntOdoo.getAllCategoriesOdooPrestashop();
+
+        if (odooPrestaCategories.isEmpty()) {
+            for (ProductCategory p : odooCategories) {
+                cntOdoo.insertCategoryOdooPrestashop(p.getId(), null, p.getComplete_Name(), null, p.getParent_Id().toString(), null);
+            }
+            for (CategoryMapper c : prestaShopCategories) {
+                cntOdoo.insertCategoryOdooPrestashop(null, Integer.parseInt(c.getId()), null, c.getName(), c.getId_parent(), c.getActive());
+            }
+            // Torno a agafar totes les categories que tinc en total
+            odooPrestaCategories = cntOdoo.getAllCategoriesOdooPrestashop();
+            
+            for (CategoryOdooPrestashop c : odooPrestaCategories) {
+                if (c.getOdoo_id() == null) {
+                    
+                } else if (c.getPrestashop_id() == null) {
+                    
+                }
+            }
+            
+        } else {
+            for (ProductCategory p : odooCategories) {
+                for (CategoryMapper c : prestaShopCategories) {
+                    /*if () {
+                        
+                    }*/
+                }
+            }
+        }
+    }
+
     private static List<String> getPrestaShopCategoriesFromTxtFile(
             ProductTemplate odooProduct,
             ControllerPrestShop cps) {
@@ -71,9 +111,10 @@ public class PrestaShopSyncService {
                         // Els numeros hardcodejats estan ficats per probar
                         CategoryMapper categoryMapper = new CategoryMapper(categorys[0].toString(), "2", "1");
 
+                        // Creo la categoria a PrestaShop i guardo el id que se li assigna
                         String categId = cps.getCategoryId(cps.uploadCategory(categoryMapper.xmlCreationCategory()));
 
-                        // El fiquem al fitxer
+                        // Fico el id de la categoria al fitxer
                         if (categId != null) {
                             updateCategoryIdInFile(
                                     "files/categorys.txt",
@@ -255,7 +296,7 @@ public class PrestaShopSyncService {
         );
         // Actualitzacio del producte
         cps.updateProduct(mapper.xmlProductPUT());
-       
+
         String prestashopProductId
                 = cps.getProductIdFromResponse(
                         cps.getProductByReference(odooProduct.getReference())

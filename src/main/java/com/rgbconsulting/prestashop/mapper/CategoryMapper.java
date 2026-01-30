@@ -96,4 +96,7 @@ public class CategoryMapper {
     public String getId() {
         return null; //acabar de fer
     }
+    public String getActive() {
+        return this.active;
+    }
 }

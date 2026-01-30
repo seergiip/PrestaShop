@@ -11,11 +11,17 @@ import java.util.List;
 import com.rgb.training.app.common.odoo.types.Record;
 import com.rgbconsulting.prestashop.common.odoo.model.ProductCategory;
 import com.rgbconsulting.prestashop.common.odoo.model.ProductProduct;
+import com.rgbconsulting.prestashop.model.CategoryOdooPrestashop;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  *
@@ -61,7 +67,7 @@ public class RestClientOdoo {
         }
         return products;
     }
-    
+
     public List<ProductProduct> getProductsProduct() throws Exception {
         Recordset rc;
         List<ProductProduct> products = new ArrayList();
@@ -162,7 +168,7 @@ public class RestClientOdoo {
 
         return quantity;
     }
-    
+
     public List<ProductCategory> getProductsCategory() throws Exception {
         Recordset rc;
         List<ProductCategory> products = new ArrayList();
@@ -184,7 +190,7 @@ public class RestClientOdoo {
         }
         return products;
     }
-    
+
     public File downloadImage(String imageUrl) throws Exception {
         URL url = new URL(imageUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -192,8 +198,7 @@ public class RestClientOdoo {
 
         File tempFile = File.createTempFile("odoo_image_", ".jpg");
 
-        try (InputStream in = conn.getInputStream();
-             FileOutputStream out = new FileOutputStream(tempFile)) {
+        try (InputStream in = conn.getInputStream(); FileOutputStream out = new FileOutputStream(tempFile)) {
 
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -216,4 +221,67 @@ public class RestClientOdoo {
         }
         return this.oc;
     }
+
+    public List<CategoryOdooPrestashop> getAllCategoriesOdooPrestashop() throws Exception {
+        List<CategoryOdooPrestashop> categories = new ArrayList();
+        CategoryOdooPrestashop category = new CategoryOdooPrestashop();
+        String sql = "SELECT * FROM category_odoo_prestashop";
+
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/odoo16",
+                "sergi",
+                "odoo1234"); PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, "1");
+
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                category.setId(rs.getInt("id"));
+                category.setId(rs.getInt("odoo_id"));
+                category.setId(rs.getInt("prestashop_id"));
+                category.setOdoo_name(rs.getString("odoo_name"));
+                category.setOdoo_name(rs.getString("prestashop_name"));
+                category.setOdoo_name(rs.getString("id_parent"));
+                category.setOdoo_name(rs.getString("active"));
+                categories.add(category);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return categories;
+    }
+
+    public void insertCategoryOdooPrestashop(
+            Integer odoo_id,
+            Integer prestashop_id,
+            String odoo_name,
+            String prestashop_name,
+            String id_parent,
+            String active
+    ) throws SQLException {
+
+        String sql = """
+        INSERT INTO category_odoo_prestashop
+        (odoo_id, prestashop_id, odoo_name, prestashop_name, id_parent, active)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """;
+
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/odoo16",
+                "sergi",
+                "odoo1234"); PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, odoo_id);
+            ps.setInt(2, prestashop_id);
+            ps.setString(3, odoo_name);
+            ps.setString(4, prestashop_name);
+            ps.setString(5, id_parent);
+            ps.setString(6, active);
+
+            ps.executeUpdate();
+        }
+    }
+
 }
