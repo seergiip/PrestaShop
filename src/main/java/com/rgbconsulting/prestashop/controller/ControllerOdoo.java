@@ -95,4 +95,24 @@ public class ControllerOdoo {
             s.printStackTrace();
         }
     }
+    
+    public void updatePrestaShop_id (Integer odoo_id, Integer prestaShopId) {
+        try {
+            restClientOdoo.updatePrestashopId(odoo_id, prestaShopId);
+        } catch (SQLException s) {
+            s.printStackTrace();
+        }
+    }
+    
+    public boolean existsCategoryByOdooId(Integer odooId) {
+        boolean exists = false;
+        try {
+            exists = restClientOdoo.existsCategoryByOdooId(odooId);
+        } catch (SQLException s) {
+            s.printStackTrace();
+        }
+        return exists;
+    }
+    
+    
 }

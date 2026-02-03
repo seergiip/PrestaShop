@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.rgbconsulting.prestashop.model;
 
 import java.util.Objects;
@@ -25,10 +22,10 @@ public class CategoryOdooPrestashop {
     }
 
     public CategoryOdooPrestashop(
-            Integer id, Integer odoo_id, Integer prestashop_id,
+            Integer odoo_id, Integer prestashop_id,
             String odoo_name, String prestashop_name,
             String id_parent, String active) {
-        this.id = id;
+        
         this.odoo_id = odoo_id;
         this.prestashop_id = prestashop_id;
         this.odoo_name = odoo_name;
@@ -47,7 +44,7 @@ public class CategoryOdooPrestashop {
     }
 
     public Integer getOdoo_id() {
-        return odoo_id;
+        return this.odoo_id;
     }
 
     public void setOdoo_id(Integer odoo_id) {

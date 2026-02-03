@@ -94,7 +94,7 @@ public class ProductTemplate {
             return null;
         }
         return "http://localhost:8069/web/image?model=product.template&id="
-                + this.id + "&field=image_128";
+                + this.id + "&field=image_1024";
     }
 
     // --- Convertir a mapa de campos para Odoo ---

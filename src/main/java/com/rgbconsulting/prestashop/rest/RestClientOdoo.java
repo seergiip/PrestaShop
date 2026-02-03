@@ -180,9 +180,25 @@ public class RestClientOdoo {
             for (int i = 0; i < rc.size(); i++) {
                 product = new ProductCategory();
                 record = rc.get(i);
+
                 product.setId((Integer) record.get("id"));
-                product.setParent_Id((Integer) record.get("parent_id"));
+                product.setName((String) record.get("name"));
+
                 product.setComplete_Name((String) record.get("complete_name"));
+                Object parent = record.get("parent_id");
+                if (parent instanceof Object[] parentArr && parentArr.length > 0) {
+                    // first element is the parent ID
+                    Object idObj = parentArr[0];
+                    if (idObj instanceof Integer) {
+                        product.setParent_Id((Integer) idObj);
+                    } else {
+                        product.setParent_Id(null); // unexpected type
+                    }
+                } else {
+                    // top-level category (parent_id == false)
+                    product.setParent_Id(null);
+                }
+
                 products.add(product);
             }
         } catch (Exception e) {
@@ -222,10 +238,9 @@ public class RestClientOdoo {
         return this.oc;
     }
 
-    public List<CategoryOdooPrestashop> getAllCategoriesOdooPrestashop() throws Exception {
-        List<CategoryOdooPrestashop> categories = new ArrayList();
-        CategoryOdooPrestashop category = new CategoryOdooPrestashop();
-        String sql = "SELECT * FROM category_odoo_prestashop";
+    public List<CategoryOdooPrestashop> getAllCategoriesOdooPrestashop() {
+        List<CategoryOdooPrestashop> categories = new ArrayList<>();
+        String sql = "SELECT * FROM category_odoo_prestashop WHERE active = ?";
 
         try (Connection c = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/odoo16",
@@ -234,16 +249,20 @@ public class RestClientOdoo {
 
             ps.setString(1, "1");
 
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                category.setId(rs.getInt("id"));
-                category.setId(rs.getInt("odoo_id"));
-                category.setId(rs.getInt("prestashop_id"));
-                category.setOdoo_name(rs.getString("odoo_name"));
-                category.setOdoo_name(rs.getString("prestashop_name"));
-                category.setOdoo_name(rs.getString("id_parent"));
-                category.setOdoo_name(rs.getString("active"));
-                categories.add(category);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    CategoryOdooPrestashop category = new CategoryOdooPrestashop();
+
+                    category.setId(rs.getInt("id"));
+                    category.setOdoo_id(rs.getInt("odoo_id"));
+                    category.setPrestashop_id(rs.getInt("prestashop_id"));
+                    category.setOdoo_name(rs.getString("odoo_name"));
+                    category.setPrestashop_name(rs.getString("prestashop_name"));
+                    category.setId_parent(rs.getString("id_parent"));
+                    category.setActive(rs.getString("active"));
+
+                    categories.add(category);
+                }
             }
 
         } catch (SQLException e) {
@@ -262,26 +281,82 @@ public class RestClientOdoo {
             String active
     ) throws SQLException {
 
-        String sql = """
+        String checkSql = "SELECT 1 FROM category_odoo_prestashop WHERE odoo_id = ?";
+        String insertSql = """
         INSERT INTO category_odoo_prestashop
         (odoo_id, prestashop_id, odoo_name, prestashop_name, id_parent, active)
         VALUES (?, ?, ?, ?, ?, ?)
-        """;
+    """;
+
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/odoo16",
+                "sergi",
+                "odoo1234"); PreparedStatement checkPs = c.prepareStatement(checkSql); PreparedStatement insertPs = c.prepareStatement(insertSql)) {
+
+            // Check if the category already exists
+            checkPs.setInt(1, odoo_id);
+            ResultSet rs = checkPs.executeQuery();
+
+            if (!rs.next()) { // does not exist → insert
+                insertPs.setInt(1, odoo_id);
+                if (prestashop_id != null) {
+                    insertPs.setInt(2, prestashop_id);
+                } else {
+                    insertPs.setNull(2, java.sql.Types.BIGINT);
+                }
+                insertPs.setString(3, odoo_name);
+                insertPs.setString(4, prestashop_name);
+                insertPs.setString(5, id_parent);
+                insertPs.setString(6, active);
+
+                insertPs.executeUpdate();
+            }
+        }
+    }
+
+    public void updatePrestashopId(
+            Integer odoo_id,
+            Integer prestashop_id
+    ) throws SQLException {
+
+        String updateSql = """
+        UPDATE category_odoo_prestashop
+        SET prestashop_id = ?
+        WHERE odoo_id = ?
+    """;
+
+        try (Connection c = DriverManager.getConnection(
+                "jdbc:postgresql://localhost:5432/odoo16",
+                "sergi",
+                "odoo1234"); PreparedStatement ps = c.prepareStatement(updateSql)) {
+
+            if (prestashop_id != null) {
+                ps.setInt(1, prestashop_id);
+            } else {
+                ps.setNull(1, java.sql.Types.BIGINT);
+            }
+
+            ps.setInt(2, odoo_id);
+
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean existsCategoryByOdooId(Integer odooId) throws SQLException {
+
+        String sql = "SELECT 1 FROM category_odoo_prestashop WHERE odoo_id = ?";
 
         try (Connection c = DriverManager.getConnection(
                 "jdbc:postgresql://localhost:5432/odoo16",
                 "sergi",
                 "odoo1234"); PreparedStatement ps = c.prepareStatement(sql)) {
 
-            ps.setInt(1, odoo_id);
-            ps.setInt(2, prestashop_id);
-            ps.setString(3, odoo_name);
-            ps.setString(4, prestashop_name);
-            ps.setString(5, id_parent);
-            ps.setString(6, active);
-
-            ps.executeUpdate();
+            ps.setInt(1, odooId);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
         }
     }
+
+    
 
 }

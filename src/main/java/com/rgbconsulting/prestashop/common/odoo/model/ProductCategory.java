@@ -11,13 +11,18 @@ import java.util.Objects;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ProductCategory {
 
-    private Integer id;                       // ID de Odoo
-    private String name;              // Nombre del producto
+    private Integer id;                     
+    private String name;             
     private String complete_name; 
-    private Integer parent_id;       // Precio de venta (Odoo list price)
+    private Integer parent_id;       
 
 
-    public ProductCategory() { }
+    public ProductCategory() {
+        this.id = 0;
+        this.name = "";
+        this.complete_name = "";
+        this.parent_id = 0;
+    }
 
     public ProductCategory(Integer id, String name, String complete_name, Integer parent_id) {
         this.id = id;
@@ -33,11 +38,11 @@ public class ProductCategory {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     
-    public Integer getParent_Id() { return parent_id; }
-    public void setParent_Id(Integer id) { this.parent_id = parent_id; }
+    public Integer getParent_Id() { return this.parent_id; }
+    public void setParent_Id(Integer id) { this.parent_id = id; }
 
     public String getComplete_Name() { return complete_name; }
-    public void setComplete_Name(String name) { this.complete_name = complete_name; }
+    public void setComplete_Name(String name) { this.complete_name = name; }
 
     
     // --- Convertir a mapa de campos para Odoo ---

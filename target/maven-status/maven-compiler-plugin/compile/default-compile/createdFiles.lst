@@ -24,3 +24,4 @@ com/rgbconsulting/prestashop/common/odoo/model/connection/OdooConnection.class
 com/rgbconsulting/prestashop/controller/ControllerOdoo.class
 com/rgbconsulting/prestashop/rest/RestClientPrestaShop.class
 com/rgbconsulting/prestashop/common/odoo/model/ProductTemplate.class
+com/rgbconsulting/prestashop/model/CategoryOdooPrestashop.class

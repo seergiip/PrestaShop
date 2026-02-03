@@ -309,7 +309,7 @@ public class RestClientPrestaShop {
                 response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
                 System.out.println("POST Status Code: " + response.statusCode());
-                System.out.println("POST Response Body: " + response.body());
+                //System.out.println("POST Response Body: " + response.body());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -551,23 +551,33 @@ public class RestClientPrestaShop {
             for (int i = 0; i < categoryNodes.getLength(); i++) {
                 Element categoryElement = (Element) categoryNodes.item(i);
 
-                String id_parent = categoryElement
-                        .getElementsByTagName("id_parent")
-                        .item(0)
-                        .getTextContent()
-                        .trim();
+                String id_parent = "";
+                NodeList parentNodes = categoryElement.getElementsByTagName("id_parent");
+                if (parentNodes != null && parentNodes.getLength() > 0 && parentNodes.item(0) != null) {
+                    id_parent = parentNodes.item(0).getTextContent().trim();
+                }
 
-                String name = categoryElement
-                        .getElementsByTagName("name")
-                        .item(0)
-                        .getTextContent()
-                        .trim();
+                // active
+                String active = "";
+                NodeList activeNodes = categoryElement.getElementsByTagName("active");
+                if (activeNodes != null && activeNodes.getLength() > 0 && activeNodes.item(0) != null) {
+                    active = activeNodes.item(0).getTextContent().trim();
+                }
 
-                String active = categoryElement
-                        .getElementsByTagName("active")
-                        .item(0)
-                        .getTextContent()
-                        .trim();
+                // name (handle multilingual <language> children)
+                String name = "";
+                NodeList nameNodes = categoryElement.getElementsByTagName("name");
+                if (nameNodes != null && nameNodes.getLength() > 0 && nameNodes.item(0) != null) {
+                    Node nameNode = nameNodes.item(0);
+                    NodeList languages = nameNode.getChildNodes();
+                    for (int j = 0; j < languages.getLength(); j++) {
+                        Node lang = languages.item(j);
+                        if ("language".equals(lang.getNodeName())) {
+                            name = lang.getTextContent().trim();
+                            break; // take only the first language
+                        }
+                    }
+                }
 
                 CategoryMapper categoryMapper
                         = new CategoryMapper(name, id_parent, active);
