@@ -145,7 +145,8 @@ public class PrestaShopSyncService {
         System.out.println("-------------------------------------------------------------");
         System.out.println("Creando producto en PrestaShop: " + odooProduct.getName());
 
-        
+        List<String> categories = getPrestaShopIdCategory(odooProduct, controllerOdoo);
+        String defaultCategory = getId_category_default(categories);
 
         if (odooProduct.getReference() != null) {
             ProductMapper mapper = new ProductMapper(
@@ -188,7 +189,8 @@ public class PrestaShopSyncService {
         System.out.println("-------------------------------------------------------------");
         System.out.println("Actualizando producto en PrestaShop: " + odooProduct.getName());
 
-        
+        List<String> categories = getPrestaShopIdCategory(odooProduct, controllerOdoo);
+        String defaultCategory = getId_category_default(categories);
 
         ProductMapper mapper = new ProductMapper(
                 "1",
@@ -255,6 +257,54 @@ public class PrestaShopSyncService {
         return null;
     }
 
-    
+    private static List<String> getPrestaShopIdCategory(ProductTemplate odooProduct, ControllerOdoo cOdoo) {
+        String odooCategory = odooProduct.getCategId().trim();
+        List<CategoryOdooPrestashop> cop = cOdoo.getAllCategoriesOdooPrestashop();
+        List<String> categories = new ArrayList<>();
+        String parent_id, category;
+        
 
+        for (int i = 0; i < cop.size(); i++) {
+            if (cop.get(i).getOdoo_name().equals(odooCategory)) {
+                category = cop.get(i).getPrestashop_id().toString();
+                categories.add(category);
+
+                // Part recursiva per agafar les categories pare del producte
+                parent_id = cop.get(i).getId_parent();
+                getPrestaShopParentsId(parent_id, cOdoo, categories);
+            }
+        }
+        return categories;
+    }
+
+    private static String getId_category_default(
+            List<String> categories) {
+        // Primera posicio de la llista es on esta la categoria per defecte
+        if (categories.size() > 0) {
+            return categories.get(0);
+        } else {
+            return null;
+        }
+    }
+
+    private static void getPrestaShopParentsId(
+            String parentId,
+            ControllerOdoo cOdoo,
+            List<String> categories) {
+
+        if (parentId == null) {
+            return;
+        }
+
+        List<CategoryOdooPrestashop> cop = cOdoo.getAllCategoriesOdooPrestashop();
+        for (CategoryOdooPrestashop c : cop) {
+            if (c.getPrestashop_id().toString().equals(parentId)) {
+                if (!categories.contains(parentId)) {
+                    categories.add(parentId);
+                }
+                getPrestaShopParentsId(c.getId_parent(), cOdoo, categories);
+                return;
+            }
+        }
+    }
 }
