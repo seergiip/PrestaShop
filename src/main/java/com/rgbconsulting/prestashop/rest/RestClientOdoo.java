@@ -24,6 +24,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
+ * REST client for interacting with Odoo ERP system. Provides methods to manage
+ * products, stock, categories, and synchronization with PrestaShop. Handles
+ * CRUD operations for product templates, product variants, stock quantities,
+ * and categories. Includes database operations for managing Odoo-PrestaShop
+ * category mappings.
  *
  * @author sergi
  */
@@ -35,6 +40,13 @@ public class RestClientOdoo {
     private static String pwd = "admin";
     private OdooConnection oc;
 
+    /**
+     * Retrieves all product templates from Odoo. Fetches product information
+     * including ID, name, prices, category, and reference code.
+     *
+     * @return List of ProductTemplate objects containing product information
+     * @throws Exception if an error occurs during the search_read operation
+     */
     public List<ProductTemplate> getProductsTemplate() throws Exception {
         Recordset rc;
         List<ProductTemplate> products = new ArrayList();
@@ -68,6 +80,14 @@ public class RestClientOdoo {
         return products;
     }
 
+    /**
+     * Retrieves all product variants (product.product) from Odoo. Fetches the
+     * product variant ID and its associated template ID.
+     *
+     * @return List of ProductProduct objects containing product variant
+     * information
+     * @throws Exception if an error occurs during the search_read operation
+     */
     public List<ProductProduct> getProductsProduct() throws Exception {
         Recordset rc;
         List<ProductProduct> products = new ArrayList();
@@ -89,6 +109,14 @@ public class RestClientOdoo {
         return products;
     }
 
+    /**
+     * Creates a new product template in Odoo.
+     *
+     * @param product ProductTemplate object containing the product data to
+     * create
+     * @return Integer ID of the newly created product
+     * @throws Exception if an error occurs during the create operation
+     */
     public Integer createProduct(ProductTemplate product) throws Exception {
         int productId = 0;
 
@@ -102,6 +130,13 @@ public class RestClientOdoo {
         return productId;
     }
 
+    /**
+     * Updates an existing product template in Odoo.
+     *
+     * @param product ProductTemplate object containing the updated product data
+     * @return Boolean indicating whether the update was successful
+     * @throws Exception if an error occurs during the update operation
+     */
     public Boolean updateProduct(ProductTemplate product) throws Exception {
         Boolean result = false;
 
@@ -116,6 +151,13 @@ public class RestClientOdoo {
         return result;
     }
 
+    /**
+     * Deletes a product template from Odoo.
+     *
+     * @param product ProductTemplate object to delete
+     * @return Recordset containing the result of the delete operation
+     * @throws Exception if an error occurs during the delete operation
+     */
     public Recordset deleteProduct(ProductTemplate product) throws Exception {
         Recordset deleted = null;
         try {
@@ -131,6 +173,13 @@ public class RestClientOdoo {
         return deleted;
     }
 
+    /**
+     * Retrieves all stock quantities from Odoo. Fetches stock information from
+     * stock.quant model including product ID and quantity.
+     *
+     * @return List of Stock objects containing stock quantity information
+     * @throws Exception if an error occurs during the search_read operation
+     */
     public List<Stock> getStocks() throws Exception {
         Recordset rc;
         List<Stock> stocks = new ArrayList();
@@ -154,6 +203,14 @@ public class RestClientOdoo {
         return stocks;
     }
 
+    /**
+     * Gets the stock quantity for a specific product. Searches through the
+     * provided stock list to find the quantity for the given product ID.
+     *
+     * @param product_id ID of the product to search for
+     * @param stocks List of Stock objects to search through
+     * @return Double value representing the product quantity (0.0 if not found)
+     */
     public Double getQuantity(Integer product_id, List<Stock> stocks) {
         Stock stock;
         Double quantity = 0.0d;
@@ -169,6 +226,14 @@ public class RestClientOdoo {
         return quantity;
     }
 
+    /**
+     * Retrieves all product categories from Odoo. Fetches category information
+     * including ID, name, complete name, and parent ID. Handles top-level
+     * categories (without parent) by setting parent_id to null.
+     *
+     * @return List of ProductCategory objects containing category information
+     * @throws Exception if an error occurs during the search_read operation
+     */
     public List<ProductCategory> getProductsCategory() throws Exception {
         Recordset rc;
         List<ProductCategory> products = new ArrayList();
@@ -207,6 +272,14 @@ public class RestClientOdoo {
         return products;
     }
 
+    /**
+     * Downloads an image from a given URL and saves it to a temporary file.
+     *
+     * @param imageUrl URL string of the image to download
+     * @return File object representing the temporary file containing the
+     * downloaded image
+     * @throws Exception if an error occurs during download or file creation
+     */
     public File downloadImage(String imageUrl) throws Exception {
         URL url = new URL(imageUrl);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -227,6 +300,14 @@ public class RestClientOdoo {
         return tempFile;
     }
 
+    /**
+     * Initializes or returns the existing Odoo connection. Thread-safe
+     * singleton pattern for OdooConnection instance.
+     *
+     * @return OdooConnection instance configured with URL, database, user ID,
+     * and password
+     * @throws Exception if an error occurs during connection initialization
+     */
     synchronized OdooConnection odoo() throws Exception {
         if (this.oc == null) {
             try {
@@ -238,6 +319,14 @@ public class RestClientOdoo {
         return this.oc;
     }
 
+    /**
+     * Retrieves all active category mappings between Odoo and PrestaShop from
+     * the database. Queries the category_odoo_prestashop table for active
+     * records.
+     *
+     * @return List of CategoryOdooPrestashop objects containing category
+     * mapping information
+     */
     public List<CategoryOdooPrestashop> getAllCategoriesOdooPrestashop() {
         List<CategoryOdooPrestashop> categories = new ArrayList<>();
         String sql = "SELECT * FROM category_odoo_prestashop WHERE active = ?";
@@ -272,6 +361,19 @@ public class RestClientOdoo {
         return categories;
     }
 
+    /**
+     * Inserts a new category mapping between Odoo and PrestaShop into the
+     * database. Checks if the category already exists before inserting to avoid
+     * duplicates.
+     *
+     * @param odoo_id ID of the category in Odoo
+     * @param prestashop_id ID of the category in PrestaShop (can be null)
+     * @param odoo_name Name of the category in Odoo
+     * @param prestashop_name Name of the category in PrestaShop
+     * @param id_parent ID of the parent category
+     * @param active Active status flag ("0" or "1")
+     * @throws SQLException if a database error occurs during insertion
+     */
     public void insertCategoryOdooPrestashop(
             Integer odoo_id,
             Integer prestashop_id,
@@ -314,6 +416,14 @@ public class RestClientOdoo {
         }
     }
 
+    /**
+     * Updates the PrestaShop ID for an existing Odoo category mapping in the
+     * database.
+     *
+     * @param odoo_id ID of the category in Odoo
+     * @param prestashop_id New PrestaShop ID to update (can be null)
+     * @throws SQLException if a database error occurs during the update
+     */
     public void updatePrestashopId(
             Integer odoo_id,
             Integer prestashop_id
@@ -342,6 +452,13 @@ public class RestClientOdoo {
         }
     }
 
+    /**
+     * Checks if a category mapping exists in the database for a given Odoo ID.
+     *
+     * @param odooId Odoo category ID to check
+     * @return Boolean indicating whether the category mapping exists
+     * @throws SQLException if a database error occurs during the check
+     */
     public boolean existsCategoryByOdooId(Integer odooId) throws SQLException {
 
         String sql = "SELECT 1 FROM category_odoo_prestashop WHERE odoo_id = ?";
@@ -356,7 +473,5 @@ public class RestClientOdoo {
             return rs.next();
         }
     }
-
-    
 
 }

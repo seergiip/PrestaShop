@@ -35,10 +35,12 @@ import org.w3c.dom.*;
 import org.xml.sax.InputSource;
 
 /**
+ * REST client for interacting with PrestaShop e-commerce platform API. Provides
+ * methods to manage products, categories, stock, and images. Handles CRUD
+ * operations with XML-based requests and responses. Includes configuration
+ * loading with AES encryption/decryption and SSL certificate handling.
  *
  * @author sergi
- *
- *
  */
 public class RestClientPrestaShop {
 
@@ -48,6 +50,15 @@ public class RestClientPrestaShop {
     private String encodedAuth = "";
     private String secret_key = "dXJ8pOkykWANFh8M";
 
+    /**
+     * Loads PrestaShop connection properties from configuration file. Decrypts
+     * URL and API key using AES encryption. Configures Basic authentication
+     * credentials.
+     *
+     * @throws FileNotFoundException if the config.properties file is not found
+     * @throws IOException if an error occurs reading the properties file
+     * @throws IllegalStateException if URL or KEY properties are missing
+     */
     public void loadProperties() throws FileNotFoundException, IOException {
         Properties p = new Properties();
         p.load(new BufferedReader(new FileReader("files/properties/config.properties")));
@@ -63,6 +74,14 @@ public class RestClientPrestaShop {
         }
     }
 
+    /**
+     * Decrypts an AES-encrypted string using ECB mode without padding. Removes
+     * manual padding from the decrypted bytes.
+     *
+     * @param encryptedData Base64-encoded encrypted string
+     * @param secret AES secret key (must be 16 bytes)
+     * @return Decrypted string, or null if decryption fails
+     */
     public String decrypt(String encryptedData, String secret) {
         try {
             // Preparar clave y cifrador
@@ -87,9 +106,13 @@ public class RestClientPrestaShop {
         }
     }
 
-
-    /*
-        Iniciar el client
+    /**
+     * Initializes an HTTP client with SSL certificate verification disabled.
+     * Configures TLS context to trust all certificates. Sets HTTP/1.1, normal
+     * redirects, and 20-second connection timeout.
+     *
+     * @return HttpClient configured with custom SSL context
+     * @throws RuntimeException if an error occurs during client initialization
      */
     public HttpClient initClient() {
 
@@ -125,9 +148,12 @@ public class RestClientPrestaShop {
         }
     }
 
-    // GET
-    /*
-        Get the product from the prestashop using the id sent on the parameter
+    /**
+     * Retrieves a specific product from PrestaShop by its ID. Prints the status
+     * code and response body to console.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param idProduct ID of the product to retrieve
      */
     public void getProductbyId(HttpClient client, String idProduct) {
         HttpRequest request = null;
@@ -156,9 +182,12 @@ public class RestClientPrestaShop {
         }
     }
 
-    // GET
-    /*
-        Get all the products from the prestashop
+    /**
+     * Retrieves all products from PrestaShop with full display details. Parses
+     * the XML response into a list of ProductTemplate objects.
+     *
+     * @param client HttpClient instance to use for the request
+     * @return List of ProductTemplate objects, or empty list if an error occurs
      */
     public List<ProductTemplate> getAllProducts(HttpClient client) {
         HttpRequest request = null;
@@ -186,11 +215,14 @@ public class RestClientPrestaShop {
         }
     }
 
-    // POST
-    /*
-        Uploads a product to the prestashop
-        If the product already exists it adds to its cuantity.
-        If the product doesn't exist it adds like a new product.
+    /**
+     * Uploads a new product to PrestaShop. If the product already exists, it
+     * adds to its quantity. If the product doesn't exist, it adds it as a new
+     * product.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param xmlProduct XML string containing the product data
+     * @return HttpResponse object containing the server response
      */
     public HttpResponse uploadProduct(HttpClient client, String xmlProduct) {
         HttpRequest request = null;
@@ -220,11 +252,13 @@ public class RestClientPrestaShop {
         return response;
     }
 
-    // PUT
-    /*
-        Updates a product from the prestashop
-        If the product doesnt't exists, it shouts an error.
-        If the product exists, it updates it.
+    /**
+     * Updates an existing product in PrestaShop. If the product doesn't exist,
+     * it returns an error. If the product exists, it updates it.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param xmlProduct XML string containing the updated product data
+     * @return HttpResponse object containing the server response
      */
     public HttpResponse updateProduct(HttpClient client, String xmlProduct) {
         HttpRequest request = null;
@@ -254,9 +288,12 @@ public class RestClientPrestaShop {
         return null;
     }
 
-    // DELETE
-    /*
-        Deletes a product from the prestashop using the id
+    /**
+     * Deletes a product from PrestaShop by its ID. Prints the status code and
+     * response body to console.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param id ID of the product to delete
      */
     public void deleteProductById(HttpClient client, String id) {
         HttpRequest request = null;
@@ -285,11 +322,14 @@ public class RestClientPrestaShop {
         }
     }
 
-    // POST
-    /*
-        Uploads a product to the prestashop
-        If the product already exists it adds to its cuantity.
-        If the product doesn't exist it adds like a new product.
+    /**
+     * Uploads a new category to PrestaShop. If the category already exists, it
+     * adds to its quantity. If the category doesn't exist, it adds it as a new
+     * category.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param xmlCategory XML string containing the category data
+     * @return HttpResponse object containing the server response
      */
     public HttpResponse uploadCategory(HttpClient client, String xmlCategory) {
         HttpRequest request = null;
@@ -319,6 +359,14 @@ public class RestClientPrestaShop {
         return response;
     }
 
+    /**
+     * Extracts the category ID from the HTTP response. Parses the XML response
+     * body to retrieve the category ID and name. Prints the created category
+     * information to console.
+     *
+     * @param response HttpResponse containing the category creation result
+     * @return String ID of the created category, or null if parsing fails
+     */
     public String getCategoryId(HttpResponse<String> response) {
         try {
             String xml = response.body();
@@ -355,6 +403,14 @@ public class RestClientPrestaShop {
         return null;
     }
 
+    /**
+     * Retrieves the available stock information for a specific product. Queries
+     * the stock_availables endpoint with product ID filter.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param id_product ID of the product to query stock for
+     * @return HttpResponse containing the stock availability data
+     */
     public HttpResponse getAvailableStock(HttpClient client, String id_product) {
         HttpRequest request = null;
         HttpResponse response = null;
@@ -383,6 +439,13 @@ public class RestClientPrestaShop {
         return response;
     }
 
+    /**
+     * Extracts the stock ID from the stock availability HTTP response. Parses
+     * the XML response body to retrieve the stock_available ID.
+     *
+     * @param response HttpResponse containing the stock availability data
+     * @return String ID of the stock record, or null if parsing fails
+     */
     public String getIdOfStock(HttpResponse response) {
         try {
             String xml = (String) response.body();
@@ -405,6 +468,14 @@ public class RestClientPrestaShop {
         return null;
     }
 
+    /**
+     * Uploads stock information to PrestaShop using PATCH method. Updates the
+     * stock_availables endpoint with new stock data. Prints the status code to
+     * console.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param xmlStock XML string containing the stock data
+     */
     public void uploadStock(HttpClient client, String xmlStock) {
 
         HttpRequest request;
@@ -431,6 +502,14 @@ public class RestClientPrestaShop {
         }
     }
 
+    /**
+     * Updates existing stock information in PrestaShop using PUT method.
+     * Modifies the stock_availables endpoint with updated stock data.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param xmlStock XML string containing the updated stock data
+     * @param stock_id ID of the stock record to update
+     */
     public void updateStock(HttpClient client, String xmlStock, String stock_id) {
         HttpRequest request = null;
         HttpResponse response;
@@ -458,6 +537,13 @@ public class RestClientPrestaShop {
         }
     }
 
+    /**
+     * Extracts the product ID from an HTTP response. Parses the XML response
+     * body to retrieve the product ID.
+     *
+     * @param response HttpResponse containing product data
+     * @return String ID of the product, or null if parsing fails
+     */
     public String getProductIdFromResponse(HttpResponse<String> response) {
         try {
             String xml = response.body();
@@ -480,6 +566,14 @@ public class RestClientPrestaShop {
         return null;
     }
 
+    /**
+     * Retrieves a product from PrestaShop by its reference code. Queries the
+     * products endpoint with reference filter and full display.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param reference Reference code of the product to retrieve
+     * @return HttpResponse containing the product data
+     */
     public HttpResponse getProductByReference(HttpClient client, String reference) {
         HttpRequest request = null;
         HttpResponse response = null;
@@ -508,6 +602,13 @@ public class RestClientPrestaShop {
         return response;
     }
 
+    /**
+     * Retrieves all categories from PrestaShop with full display details.
+     * Queries the categories endpoint.
+     *
+     * @param client HttpClient instance to use for the request
+     * @return HttpResponse containing all categories data
+     */
     public HttpResponse getPrestaShopCategories(HttpClient client) {
         HttpRequest request = null;
         HttpResponse response = null;
@@ -536,6 +637,15 @@ public class RestClientPrestaShop {
         return response;
     }
 
+    /**
+     * Parses PrestaShop categories from HTTP response into a list of
+     * CategoryMapper objects. Extracts category name, parent ID, and active
+     * status from XML response. Handles multilingual category names by taking
+     * the first language.
+     *
+     * @param response HttpResponse containing categories XML data
+     * @return List of CategoryMapper objects with parsed category information
+     */
     public List<CategoryMapper> getPrestaShopCategoriesToList(HttpResponse response) {
         List<CategoryMapper> categories = new ArrayList<>();
 
@@ -592,6 +702,19 @@ public class RestClientPrestaShop {
         return categories;
     }
 
+    /**
+     * Uploads a product image to PrestaShop. First retrieves the product by
+     * reference to get its PrestaShop ID. Constructs a multipart/form-data
+     * request with the image file. Uses the images/products endpoint for
+     * upload.
+     *
+     * @param client HttpClient instance to use for the request
+     * @param imageFile File object containing the image to upload
+     * @param productReference Reference code of the product to attach the image
+     * to
+     * @throws Exception if product is not found, or upload fails
+     * @throws RuntimeException if HTTP status is not 200/201
+     */
     public void uploadImage(
             HttpClient client,
             File imageFile,

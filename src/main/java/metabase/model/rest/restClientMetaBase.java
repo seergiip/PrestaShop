@@ -10,6 +10,9 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /**
+ * REST client for interacting with the Metabase API. Provides methods to manage
+ * dashboards, cards, users, groups, and collections. Handles authentication
+ * using API key and session-based requests.
  *
  * @author sergi
  */
@@ -20,6 +23,13 @@ public class restClientMetaBase {
     private static String USERNAME = "sergipanec@gmail.com";
     private static String PASSWORD = "odoo1234";
 
+    /**
+     * Initializes and configures an HTTP client with default parameters.
+     *
+     * @return HttpClient configured with HTTP/1.1, normal redirects, and
+     * 20-second connection timeout
+     * @throws RuntimeException if an error occurs during initialization
+     */
     public HttpClient initClient() {
 
         try {
@@ -34,8 +44,10 @@ public class restClientMetaBase {
         }
     }
 
-    /*
-        Es un client per probar connection
+    /**
+     * Tests authentication with the Metabase API by making a request to the
+     * permissions/group endpoint. Prints the status code and response body to
+     * console.
      */
     public void tryAuth() {
         HttpClient client = initClient();
@@ -65,8 +77,11 @@ public class restClientMetaBase {
         }
     }
 
-    // Llistar informació des de metabase via API des de Odoo/Java
-    //  - Dashboards i cards
+    /**
+     * Lists information for a specific dashboard from Metabase. Makes a GET
+     * request to /dashboard/1 endpoint. Prints the status code and dashboard
+     * information to console.
+     */
     public void listDashboards() {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -97,6 +112,11 @@ public class restClientMetaBase {
         }
     }
 
+    /**
+     * Lists all available cards in Metabase. Makes a GET request to /card
+     * endpoint with 'all' filter. Prints the status code and card information
+     * to console.
+     */
     public void listCards() {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -127,11 +147,13 @@ public class restClientMetaBase {
         }
     }
 
-    // Crear informació a metabase via API des de Odoo/Java
-    /* Crear card amb una consulta SQL simple
-        Ejemplos:
-        - Ventas per mes/día
-        - Usuarios activos
+    /**
+     * Creates a new card in Metabase with the provided data. Useful for
+     * creating cards with simple SQL queries (e.g., sales per day/month, active
+     * users).
+     *
+     * @param data JSON string containing the card configuration and query
+     * information
      */
     public void createCardInfo(String data) {
         HttpClient client = initClient();
@@ -164,6 +186,15 @@ public class restClientMetaBase {
         }
     }
 
+    /**
+     * Creates a new user in Metabase.
+     *
+     * @param first_name user's first name
+     * @param last_name user's last name
+     * @param email user's email address
+     * @param id group ID to assign the user to
+     * @param is_group_manager whether the user should be a group manager
+     */
     public void createUser(String first_name, String last_name, String email, Integer id, Boolean is_group_manager) {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -196,6 +227,16 @@ public class restClientMetaBase {
 
     }
 
+    /**
+     * Generates JSON formatted user data for user creation requests.
+     *
+     * @param first_name user's first name
+     * @param last_name user's last name
+     * @param email user's email address
+     * @param id group ID
+     * @param is_group_manager whether the user is a group manager
+     * @return JSON string with user data
+     */
     private String userData(String first_name, String last_name, String email, Integer id, Boolean is_group_manager) {
         return "{\n"
                 + "  \"email\": \"" + email + "\",\n"
@@ -214,6 +255,12 @@ public class restClientMetaBase {
                 + "}";
     }
 
+    /**
+     * Creates a new permission group in Metabase.
+     *
+     * @param name name of the group
+     * @param is_tenant_group whether this is a tenant group
+     */
     public void createGroup(String name, Boolean is_tenant_group) {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -246,6 +293,13 @@ public class restClientMetaBase {
 
     }
 
+    /**
+     * Generates JSON formatted group data for group creation requests.
+     *
+     * @param name group name
+     * @param is_tenant_group whether this is a tenant group
+     * @return JSON string with group data
+     */
     private String groupData(String name, Boolean is_tenant_group) {
         return "{\n"
                 + "  \"is_tenant_group\": " + is_tenant_group.toString() + ",\n"
@@ -254,6 +308,14 @@ public class restClientMetaBase {
 
     }
 
+    /**
+     * Adds an existing user to a permission group.
+     *
+     * @param group_id ID of the group
+     * @param is_group_manager whether the user should be a manager of this
+     * group
+     * @param user_id ID of the user to add
+     */
     public void addUserToGroup(Integer group_id, Boolean is_group_manager, Integer user_id) {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -285,6 +347,14 @@ public class restClientMetaBase {
         }
     }
 
+    /**
+     * Generates JSON formatted data for adding a user to a group.
+     *
+     * @param group_id ID of the group
+     * @param is_group_manager whether the user is a group manager
+     * @param user_id ID of the user
+     * @return JSON string with membership data
+     */
     private String userToGroupInfo(Integer group_id, Boolean is_group_manager, Integer user_id) {
         return "{\n"
                 + "  \"group_id\": " + group_id.toString() + ",\n"
@@ -293,6 +363,13 @@ public class restClientMetaBase {
                 + "}";
     }
 
+    /**
+     * Obtains a session ID by authenticating with username and password. Parses
+     * the session ID from the API response.
+     *
+     * @param json JSON string containing username and password credentials
+     * @return session ID string extracted from the response
+     */
     private String getSessionId(String json) {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -332,6 +409,12 @@ public class restClientMetaBase {
         return id;
     }
 
+    /**
+     * Creates a new collection in Metabase. Requires session authentication.
+     * Creates a test collection with predefined values (authority_level:
+     * official, parent_id: 1). Prints the status code and response body to
+     * console.
+     */
     public void postCollection() {
         String sessionJson = "{"
                 + "\"username\": \"" + this.USERNAME + "\","
@@ -376,6 +459,11 @@ public class restClientMetaBase {
         }
     }
 
+    /**
+     * Creates a new dashboard in Metabase. Requires session authentication.
+     * Creates a test dashboard named "Dashboard de Proba" in collection ID 1.
+     * Prints the status code and response body to console.
+     */
     public void createDashBoard() {
         String sessionJson = "{"
                 + "\"username\": \"" + this.USERNAME + "\","
@@ -417,6 +505,12 @@ public class restClientMetaBase {
         }
     }
 
+    /**
+     * Makes a dashboard publicly accessible by generating a public link.
+     *
+     * @param dashboard_id ID of the dashboard to make public
+     * @return UUID string of the public link
+     */
     public String makeDashBoardPublic(String dashboard_id) {
         HttpClient client = initClient();
         HttpRequest request = null;
@@ -454,6 +548,12 @@ public class restClientMetaBase {
         return uuid;
     }
 
+    /**
+     * Deletes the public link of a dashboard, making it private again.
+     *
+     * @param dashboard_id ID of the dashboard whose public link should be
+     * deleted
+     */
     public void deleteDashBoardPublicLink(String dashboard_id) {
         HttpClient client = initClient();
         HttpRequest request = null;
